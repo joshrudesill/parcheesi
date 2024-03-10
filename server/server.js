@@ -30,7 +30,7 @@ app.use(sessionMiddleware);
 // Start Passport Sessions
 app.use(passport.initialize());
 app.use(passport.session());
-
+const roomData = {};
 // Routes
 app.use("/api/user", userRouter);
 app.use("/api/game", gameSetupRouter);
@@ -38,6 +38,43 @@ io.on("connection", (socket) => {
   console.log("connect");
   socket.on("hello", () => {
     socket.emit("hi", true);
+  });
+  socket.on("join-game-room", (gameRoom, username) => {
+    socket.gameRoom = gameRoom;
+    socket.username = username;
+
+    if (!roomData[gameRoom]) {
+      roomData[gameRoom] = [];
+    }
+    if (!roomData[gameRoom].includes(username)) {
+      roomData[gameRoom].push(username);
+    }
+    socket.join(gameRoom);
+    io.to(gameRoom).emit("player-joined", roomData[gameRoom]);
+  });
+  socket.on("leaving-gameroom", () => {
+    if (roomData[socket.gameRoom]) {
+      roomData[socket.gameRoom] = roomData[socket.gameRoom].filter(
+        (i) => i !== socket.username
+      );
+      socket.leave(socket.gameRoom);
+      io.to(socket.gameRoom).emit(
+        "leaving-gameroom",
+        roomData[socket.gameRoom]
+      );
+    }
+  });
+  socket.on("disconnect", () => {
+    console.log("player dc");
+    if (roomData[socket.gameRoom]) {
+      roomData[socket.gameRoom] = roomData[socket.gameRoom].filter(
+        (i) => i !== socket.username
+      );
+      io.to(socket.gameRoom).emit(
+        "leaving-gameroom",
+        roomData[socket.gameRoom]
+      );
+    }
   });
 });
 

@@ -8,19 +8,30 @@ export default function Play() {
   const dispatch = useDispatch();
   const user = useSelector((s) => s.user.currentUser);
   const history = useHistory();
+  const [gameCode, setGameCode] = useState("");
   useEffect(() => {
-    if (user && user.current_game) {
+    if (user && user.current_game !== null) {
       history.push("/lobby");
     }
   }, [user.current_game]);
   const gameInit = async () => {
-    const { data } = await axios.get("/api/game/init-setup");
-    dispatch(setGameCode(data));
+    await axios.get("/api/game/init-setup");
+    dispatch({ type: "FETCH_USER" });
+  };
+  const joinGame = async () => {
+    await axios.post("/api/game/join", { gameCode });
+    dispatch({ type: "FETCH_USER" });
   };
   return (
     <div>
       <button onClick={gameInit}>Create</button>
-      <input />
+
+      <input
+        value={gameCode}
+        onChange={(e) => setGameCode(e.target.value)}
+        maxLength={6}
+      />
+      <button onClick={joinGame}>Join</button>
     </div>
   );
 }

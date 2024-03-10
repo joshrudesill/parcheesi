@@ -22,6 +22,7 @@ import { socket } from "../../../socket";
 import "./App.css";
 import Play from "../Play/Play";
 import Lobby from "../Lobby/Lobby";
+import { addPlayer, setAdmin } from "../../redux/reducers/game.reducer";
 
 function App() {
   const dispatch = useDispatch();
@@ -48,12 +49,21 @@ function App() {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on("hi", onFooEvent);
+    socket.onAny((event, ...args) => {
+      console.log(event, args);
+    });
+    socket.on("player-joined", (player) => {
+      dispatch(addPlayer(player));
+    });
+    socket.on("leaving-gameroom", (player) => {
+      dispatch(addPlayer(player));
+    });
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off("hi", onFooEvent);
+      socket.off("player-joined", onDisconnect);
+      socket.off("leaving-gameroom", onDisconnect);
     };
   }, []);
   const t = () => {
@@ -66,7 +76,6 @@ function App() {
         <Nav />
         <div>{isConnected ? "CONN" : "N-CONN"}</div>
         <div>{JSON.stringify(fooEvents)}</div>
-        <button onClick={t}>Emit</button>
         <Switch>
           {/* Visiting localhost:5173 will redirect to localhost:5173/home */}
           <Redirect exact from='/' to='/home' />
