@@ -1,14 +1,17 @@
-const userReducer = (state = {}, action) => {
-  switch (action.type) {
-    case 'SET_USER':
-      return action.payload;
-    case 'UNSET_USER':
-      return {};
-    default:
-      return state;
-  }
-};
+import { createSlice } from "@reduxjs/toolkit";
+const initialState = { currentUser: {} };
+const userSlice = createSlice({
+  name: "user",
+  initialState,
+  reducers: {
+    setUser: (state, action) => {
+      state.currentUser = action.payload;
+    },
+    unsetUser: (state) => {
+      state.currentUser = {};
+    },
+  },
+});
 
-// user will be on the redux state at:
-// state.user
-export default userReducer;
+export const { setUser, unsetUser } = userSlice.actions;
+export default userSlice.reducer;

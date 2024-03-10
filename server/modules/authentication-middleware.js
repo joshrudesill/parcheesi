@@ -6,6 +6,7 @@ const rejectUnauthenticated = (req, res, next) => {
     next();
   } else {
     // failure best handled on the server. do redirect here.
+    console.log("un");
     res.sendStatus(403);
   }
 };
