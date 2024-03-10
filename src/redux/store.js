@@ -7,6 +7,7 @@ import rootSaga from "./sagas/_root.saga"; // imports ./redux/sagas/index.js
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./reducers/user.reducer";
 import errorsReducer from "./reducers/errors.reducer";
+import gameReducer from "./reducers/game.reducer";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -19,7 +20,7 @@ const middlewareList =
     : [sagaMiddleware];
 
 export default configureStore({
-  reducer: { user: userReducer, errors: errorsReducer },
+  reducer: { user: userReducer, errors: errorsReducer, game: gameReducer },
   middleware: () => new Array(sagaMiddleware),
   devTools: true,
 });
