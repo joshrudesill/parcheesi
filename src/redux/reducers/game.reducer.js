@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-const initialState = { gameCode: "", players: [], admin: false };
+const initialState = {
+  gameCode: "",
+  players: [],
+  admin: false,
+  gameStarted: false,
+};
 const gameSlice = createSlice({
   name: "user",
   initialState,
@@ -13,8 +18,13 @@ const gameSlice = createSlice({
     setAdmin: (state, action) => {
       state.admin = action.payload;
     },
+    setGameStarted: (state, action) => {
+      state.gameStarted = action.payload;
+    },
+    gameReset: () => initialState,
   },
 });
 
-export const { setGameCode, addPlayer, setAdmin } = gameSlice.actions;
+export const { setGameCode, addPlayer, setAdmin, setGameStarted, gameReset } =
+  gameSlice.actions;
 export default gameSlice.reducer;

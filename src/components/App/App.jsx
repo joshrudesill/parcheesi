@@ -22,7 +22,13 @@ import { socket } from "../../../socket";
 import "./App.css";
 import Play from "../Play/Play";
 import Lobby from "../Lobby/Lobby";
-import { addPlayer, setAdmin } from "../../redux/reducers/game.reducer";
+import {
+  addPlayer,
+  gameReset,
+  setAdmin,
+  setGameStarted,
+} from "../../redux/reducers/game.reducer";
+import Game from "../Game/Game";
 
 function App() {
   const dispatch = useDispatch();
@@ -34,6 +40,7 @@ function App() {
   useEffect(() => {
     dispatch({ type: "FETCH_USER" });
   }, [dispatch]);
+
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
@@ -41,10 +48,6 @@ function App() {
 
     function onDisconnect() {
       setIsConnected(false);
-    }
-
-    function onFooEvent(value) {
-      setFooEvents((previous) => [...previous, value]);
     }
 
     socket.on("connect", onConnect);
@@ -57,6 +60,15 @@ function App() {
     });
     socket.on("leaving-gameroom", (player) => {
       dispatch(addPlayer(player));
+    });
+    socket.on("gameover", (reason) => {
+      dispatch(gameReset());
+      console.log("gameover");
+      // all users should be updated
+      dispatch({ type: "FETCH_USER" });
+    });
+    socket.on("game-start", () => {
+      dispatch(setGameStarted(true));
     });
 
     return () => {
@@ -104,6 +116,13 @@ function App() {
             path='/lobby'
           >
             <Lobby />
+          </ProtectedRoute>
+          <ProtectedRoute
+            // logged in shows UserPage else shows LoginPage
+            exact
+            path='/game'
+          >
+            <Game />
           </ProtectedRoute>
 
           <ProtectedRoute

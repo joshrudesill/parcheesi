@@ -3,7 +3,11 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { socket } from "../../../socket";
-import { addPlayer, setAdmin } from "../../redux/reducers/game.reducer";
+import {
+  addPlayer,
+  setAdmin,
+  setGameStarted,
+} from "../../redux/reducers/game.reducer";
 
 export default function Lobby() {
   const user = useSelector((s) => s.user.currentUser);
@@ -15,6 +19,11 @@ export default function Lobby() {
       history.push("/play");
     }
   }, [user.current_game]);
+  useEffect(() => {
+    if (game.gameStarted && user.current_game) {
+      history.push("/game");
+    }
+  }, [game.gameStarted, user.current_game]);
   useEffect(() => {
     if (
       game.players.length > 0 &&
@@ -60,10 +69,24 @@ export default function Lobby() {
       console.error(e);
     }
   };
+  const startGame = async () => {
+    try {
+      const res = await axios.put("/api/game/startgame", {
+        gameCode: user.game_code,
+      });
+
+      if (res.status === 201) {
+        socket.emit("notify-game-start");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
   return (
     <div>
       <h2>{user.current_game}</h2>
       <button onClick={leaveGame}>Leave</button>
+      <button onClick={startGame}>start</button>
       <div>
         {game.players.map((p) => (
           <p>{p}</p>

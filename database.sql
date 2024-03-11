@@ -13,5 +13,6 @@ create table "game_state" (
 	"piece_positions" varchar(100) not null,
 	"turn" integer default 1 not null,
 	"ts" timestamp,
-	"game_code" varchar(6) unique
+	"game_code" varchar(6) unique,
+    "game_started" boolean default false
 );

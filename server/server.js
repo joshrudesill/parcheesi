@@ -18,6 +18,7 @@ const passport = require("./strategies/user.strategy");
 // Route Includes
 const userRouter = require("./routes/user.router");
 const gameSetupRouter = require("./routes/game-setup.router.js");
+const pool = require("./modules/pool.js");
 
 // Express Middleware
 app.use(express.json());
@@ -64,16 +65,45 @@ io.on("connection", (socket) => {
       );
     }
   });
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     console.log("player dc");
     if (roomData[socket.gameRoom]) {
-      roomData[socket.gameRoom] = roomData[socket.gameRoom].filter(
-        (i) => i !== socket.username
+      if (roomData[socket.gameRoom].started) {
+        // Player left while in game, need to end whole game
+        await pool.query(
+          `UPDATE "user" SET current_game = null WHERE current_game = $1;`,
+          [socket.gameRoom]
+        );
+        delete roomData[socket.gameRoom];
+        console.log(roomData);
+        io.to(socket.gameRoom).emit("gameover", "player-left");
+      } else {
+        roomData[socket.gameRoom] = roomData[socket.gameRoom].filter(
+          (i) => i !== socket.username
+        );
+        io.to(socket.gameRoom).emit(
+          "leaving-gameroom",
+          roomData[socket.gameRoom]
+        );
+      }
+    }
+  });
+  socket.on("leaving-startedgame", async () => {
+    if (roomData[socket.gameRoom]) {
+      // end game in sql
+      await pool.query(
+        `UPDATE "user" SET current_game = null WHERE current_game = $1;`,
+        [socket.gameRoom]
       );
-      io.to(socket.gameRoom).emit(
-        "leaving-gameroom",
-        roomData[socket.gameRoom]
-      );
+      delete roomData[socket.gameRoom];
+      console.log(roomData);
+      io.to(socket.gameRoom).emit("gameover", "player-left");
+    }
+  });
+  socket.on("notify-game-start", async () => {
+    if (roomData[socket.gameRoom]) {
+      roomData[socket.gameRoom].started = true;
+      io.to(socket.gameRoom).emit("game-start");
     }
   });
 });

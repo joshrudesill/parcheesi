@@ -8,32 +8,30 @@ const { randomUUID } = require("node:crypto");
 
 router.get("/init-setup", rejectUnauthenticated, async (req, res) => {
   const gameCode = randomUUID().slice(0, 6);
-
+  const connection = await pool.connect();
   try {
-    const r1 = await pool.query(
+    await connection.query("BEGIN");
+    await connection.query(
       `INSERT INTO "game_state" 
-          (
-              "piece_positions", "ts", "game_code" 
-              )
-              VALUES 
-              (
-                  $1,$2,$3
-                  );
-                  
-                  `,
+          ("piece_positions", "ts", "game_code")
+            VALUES 
+          ($1,$2,$3);`,
       ["1,1,1,1+2,2,2,2+3,3,3,3+4,4,4,4", new Date(), gameCode]
     );
 
-    const r2 = await pool.query(
+    await connection.query(
       `UPDATE "user" SET current_game = $1 WHERE id = $2;`,
       [gameCode, req.user.id]
     );
+    await connection.query("COMMIT");
+    res.send(gameCode);
   } catch (e) {
     console.error(e);
+    await connection.query("ROLLBACK");
     res.sendStatus(404);
+  } finally {
+    connection.release();
   }
-
-  res.send(gameCode);
 });
 router.get("/cgs", rejectUnauthenticated, async (req, res) => {
   try {
@@ -49,12 +47,22 @@ router.get("/cgs", rejectUnauthenticated, async (req, res) => {
 });
 
 router.post("/join", rejectUnauthenticated, async (req, res) => {
-  console.log(req.query);
-  console.log(req.body);
   try {
     const game = await pool.query(
       'UPDATE "user" SET current_game = $1 WHERE id = $2',
       [req.body.gameCode, req.user.id]
+    );
+    res.sendStatus(201);
+  } catch (e) {
+    console.error(e);
+    res.send(500);
+  }
+});
+router.put("/startgame", async (req, res) => {
+  try {
+    const game = await pool.query(
+      'UPDATE "game_state" SET game_started = true WHERE game_code = $1',
+      [req.body.gameCode]
     );
     res.sendStatus(201);
   } catch (e) {
