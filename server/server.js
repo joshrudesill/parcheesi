@@ -66,7 +66,6 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("disconnect", async () => {
-    console.log("player dc");
     if (roomData[socket.gameRoom]) {
       if (roomData[socket.gameRoom].started) {
         // Player left while in game, need to end whole game
