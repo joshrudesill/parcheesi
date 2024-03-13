@@ -78,12 +78,6 @@ const parseGameIntoMemory = (piecePostitions, numPlayers, turn) => {
   setup(numPlayers);
   // Find blocks
   for (let i = 0; i < gameState.numPlayers; i++) {
-    // playerArrays[i].forEach((x) => {
-    //   doubles[x] = (doubles[x] || 0) + 1;
-    //   if (doubles[x] === 2) {
-    //     blocks[x] = i;
-    //   }
-    // });
     currentPlayers[i].pieces = playerArrays[i];
     currentPlayers[i].lastPiece = { player: lastAt[i][0], at: lastAt[i][1] };
   }
@@ -109,7 +103,7 @@ const takeTurn = (player) => {
     Math.floor(Math.random() * 5) + 1,
     Math.floor(Math.random() * 5) + 1,
   ];
-  roll = [1, 5];
+  roll = [1, 4];
 
   // Check if any pieces at home still, if so force removal on 5
   if (roll[0] === roll[1]) {
@@ -127,6 +121,21 @@ const takeTurn = (player) => {
   calculateAllowedMoves(roll, player);
 };
 const calculateAllowedMoves = (roll, player) => {
+  let doubles = {};
+  for (let i = 0; i < gameState.numPlayers; i++) {
+    currentPlayers[i].pieces.forEach((x) => {
+      if (x !== 0) {
+        if (doubles[x]) {
+          doubles[x].push(i);
+        } else {
+          doubles[x] = [i];
+        }
+        if (doubles[x].length === 2) {
+          blocks[x] = doubles[x];
+        }
+      }
+    });
+  }
   if (roll.includes(5) && player.pieces.some((p) => p === 0)) {
     for (let i = 0; i < player.pieces.length; i++) {
       if (player.pieces[i] === 0) {
@@ -161,28 +170,11 @@ const calculateAllowedMoves = (roll, player) => {
       }
     }
   }
-  let doubles = {};
-  for (let i = 0; i < gameState.numPlayers; i++) {
-    currentPlayers[i].pieces.forEach((x) => {
-      if (x !== 0) {
-        if (doubles[x]) {
-          doubles[x].push(i);
-        } else {
-          doubles[x] = [i];
-        }
-        if (doubles[x].length === 2) {
-          blocks[x] = doubles[x];
-        }
-      }
-    });
-  }
 
   // if there is a block at porch -
   // check if its a personal block
   // if so remove -1 from any pieces at home (0)
-  console.log("blocks", blocks);
   if (blocks.hasOwnProperty(player.homeSquare)) {
-    console.log("block at home");
     if (
       blocks[player.homeSquare][0] + 1 === gameState.turn &&
       blocks[player.homeSquare][1] + 1 === gameState.turn
@@ -196,41 +188,42 @@ const calculateAllowedMoves = (roll, player) => {
 const makeMove = (move, piece, player) => {
   if (move === -1) {
     let newSquare = player.homeSquare;
-
     player.pieces[piece] = newSquare;
+    let pieceTaken = false;
     if (
       player.lastPiece.player !== -1 &&
       blocks.hasOwnProperty(player.homeSquare)
     ) {
-      console.log("kicking piece");
       currentPlayers[player.lastPiece.player].pieces[player.lastPiece.at] = 0;
+      player.turns++;
+      pieceTaken = true;
+      player.lastAt = { player: -1, at: -1 };
     }
-    // Check for other players
-    for (const p of currentPlayers) {
-      if (p.color === player.color) {
-        continue;
-      }
-      for (let i = 0; i < 3; i++) {
-        if (p.pieces[i] === newSquare && !safeSquares.includes(p.pieces[i])) {
-          // Take piece
-          // need more logic here to determine who was first on the porch square
-          p.pieces[i] = 0;
-        }
-      }
-    }
+
     player.pieceOptions[piece] = [];
+    // need to reset lastPiece at some point..
     player.moveBag =
       player.moveBag[0] === 5 ? [player.moveBag[1]] : [player.moveBag[0]];
+    if (pieceTaken) player.moveBag.push(20);
   } else {
     const enemyHomeSquares = homeSquares.filter((i) => i !== player.homeSquare);
-    console.log(enemyHomeSquares);
     const squareToMove = getSquare(player.pieces[piece], move);
+    let pieceTaken = false;
     if (enemyHomeSquares.includes(squareToMove)) {
       currentPlayers[
         homeSquares.findIndex((i) => i === squareToMove)
       ].lastPiece = {
         player: gameState.turn - 1,
         at: piece,
+      };
+    }
+    // If player starts at enemy home square then moves away, need to reset last at
+    if (enemyHomeSquares.includes(player.pieces[piece])) {
+      currentPlayers[
+        homeSquares.findIndex((i) => i === squareToMove)
+      ].lastPiece = {
+        player: -1,
+        at: -1,
       };
     }
     player.pieces[piece] = squareToMove;
@@ -245,12 +238,17 @@ const makeMove = (move, piece, player) => {
           !safeSquares.includes(p.pieces[i])
         ) {
           // Take piece
+          console.log("take1");
           p.pieces[i] = 0;
+          player.moveBag.push(20);
+          player.turns++;
+          pieceTaken = true;
         }
       }
     }
     player.moveBag =
       player.moveBag[0] === move ? [player.moveBag[1]] : [player.moveBag[0]];
+    if (pieceTaken) player.moveBag.push(20);
   }
   player.pieceOptions = defaultPlayer.pieceOptions;
   calculateAllowedMoves(player.moveBag, player);
@@ -260,7 +258,12 @@ const getSquare = (start, amount) => {
   return (start + amount) % 68;
 };
 parseGameIntoMemory(
-  "0,0,5,0+5,22,0,0+0,0,0,0+0,0,0,0#1,0+-1,-1+-1,-1+-1,-1",
+  `
+  0,0,5,0
+  +
+  0,6,5,0
+  +0,0,0,0+0,0,0,0#
+  1,2+-1,-1+-1,-1+-1,-1`,
   2,
   1
 );
