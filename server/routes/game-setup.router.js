@@ -16,7 +16,11 @@ router.get("/init-setup", rejectUnauthenticated, async (req, res) => {
           ("piece_positions", "ts", "game_code")
             VALUES 
           ($1,$2,$3);`,
-      ["1,1,1,1+2,2,2,2+3,3,3,3+4,4,4,4", new Date(), gameCode]
+      [
+        "0,0,5,0+0,39,0,0+0,0,0,0+0,0,0,0#-1,-1+-1,-1+-1,-1+-1,-1",
+        new Date(),
+        gameCode,
+      ]
     );
 
     await connection.query(

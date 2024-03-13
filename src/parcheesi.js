@@ -63,7 +63,7 @@ let safeSquares = [5, 12, 17, 22, 29, 39, 46, 51, 56, 63, 68];
 //  Actions [ receiveNewGameState<()>, rollDice<()>, movePiece<()> ],
 //  State [ moveBag<[]>, turnsLeft<int> (for rolling doubles), pieceOptions<[[]]>, pieces<[]>, turn<int>, numPlayers<int>, canMovePieces<bool>, canRoll<bool> ]
 // "1,1,1,1+2,2,2,2+3,3,3,3+4,4,4,4"
-const parseGameIntoMemory = (piecePostitions, numPlayers, turn) => {
+export const parseGameIntoMemory = (piecePostitions, numPlayers, turn, cb) => {
   gameState.numPlayers = numPlayers;
   gameState.turn = turn;
   // Parse db result into array
@@ -81,6 +81,7 @@ const parseGameIntoMemory = (piecePostitions, numPlayers, turn) => {
     currentPlayers[i].pieces = playerArrays[i];
     currentPlayers[i].lastPiece = { player: lastAt[i][0], at: lastAt[i][1] };
   }
+  cb(currentPlayers);
 };
 const setup = (numPlayers) => {
   // Error checking
@@ -257,20 +258,20 @@ const makeMove = (move, piece, player) => {
 const getSquare = (start, amount) => {
   return (start + amount) % 68;
 };
-parseGameIntoMemory(
-  `
-  0,0,5,0
-  +
-  0,6,5,0
-  +0,0,0,0+0,0,0,0#
-  1,2+-1,-1+-1,-1+-1,-1`,
-  2,
-  1
-);
+// parseGameIntoMemory(
+//   `
+//   0,0,5,0
+//   +
+//   0,6,5,0
+//   +0,0,0,0+0,0,0,0#
+//   1,2+-1,-1+-1,-1+-1,-1`,
+//   2,
+//   1
+// );
 
-takeTurn(currentPlayers[0]);
-console.log(currentPlayers[0]);
-makeMove(-1, 3, currentPlayers[0]);
-console.log(currentPlayers[0]);
-console.log(currentPlayers[1]);
-console.log(blocks);
+// takeTurn(currentPlayers[0]);
+// console.log(currentPlayers[0]);
+// makeMove(-1, 3, currentPlayers[0]);
+// console.log(currentPlayers[0]);
+// console.log(currentPlayers[1]);
+// console.log(blocks);
