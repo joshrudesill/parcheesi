@@ -99,7 +99,13 @@ const setup = (numPlayers) => {
   }
   board = new Uint8ClampedArray(68).map((_, i) => i);
 };
-const takeTurn = (player) => {
+export function takeTurn(gs, pturn) {
+  currentPlayers = Object.assign([], gs);
+  console.log(Object.isExtensible(currentPlayers)); // false
+  console.log(Object.isExtensible(currentPlayers[pturn]));
+  let player = Object.assign({}, currentPlayers[pturn]);
+  console.log(Object.isExtensible(player)); // true
+  console.log(player);
   let roll = [
     Math.floor(Math.random() * 5) + 1,
     Math.floor(Math.random() * 5) + 1,
@@ -118,9 +124,10 @@ const takeTurn = (player) => {
   // When one 5 is rolled
   if ((roll[0] === 5 || roll[1] === 5) && !(roll[0] === 5 && roll[1] === 5)) {
   }
-  player.moveBag.push(...roll);
+  player.moveBag = [...roll];
   calculateAllowedMoves(roll, player);
-};
+  return player;
+}
 const calculateAllowedMoves = (roll, player) => {
   let doubles = {};
   for (let i = 0; i < gameState.numPlayers; i++) {
@@ -167,6 +174,7 @@ const calculateAllowedMoves = (roll, player) => {
           }
         }
         //   console.log("Piece options is now:", out);
+        player.pieceOptions = [...player.pieceOptions];
         player.pieceOptions[j] = out;
       }
     }

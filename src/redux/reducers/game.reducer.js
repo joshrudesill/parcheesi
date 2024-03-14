@@ -5,6 +5,9 @@ const initialState = {
   admin: false,
   gameStarted: false,
   gameState: [],
+  lastTurn: [],
+  turn: 0,
+  playerNumber: -1,
 };
 // {
 //   canMovePieces: false,
@@ -36,6 +39,25 @@ const gameSlice = createSlice({
     setGame: (state, action) => {
       state.gameState = action.payload;
     },
+    setLastTurn: (state, action) => {
+      state.lastTurn = action.payload;
+    },
+    setTurn: (state, action) => {
+      state.turn = action.payload;
+    },
+    takeTurnRedux: (state, action) => {
+      const { turn, gs } = action.payload;
+      console.log(gs);
+      state.gameState = state.gameState.map((g, i) => {
+        if (i === turn) {
+          return gs;
+        }
+        return g;
+      });
+    },
+    setPlayerNumber: (state, action) => {
+      state.playerNumber = action.payload;
+    },
     gameReset: () => initialState,
   },
 });
@@ -47,5 +69,9 @@ export const {
   setGameStarted,
   gameReset,
   setGame,
+  setLastTurn,
+  setTurn,
+  takeTurnRedux,
+  setPlayerNumber,
 } = gameSlice.actions;
 export default gameSlice.reducer;
