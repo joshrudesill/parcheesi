@@ -125,10 +125,10 @@ export function takeTurn(gs, pturn) {
   if ((roll[0] === 5 || roll[1] === 5) && !(roll[0] === 5 && roll[1] === 5)) {
   }
   player.moveBag = [...roll];
-  calculateAllowedMoves(roll, player);
+  calculateAllowedMoves(roll, player, currentPlayers);
   return player;
 }
-const calculateAllowedMoves = (roll, player) => {
+const calculateAllowedMoves = (roll, player, currentPlayers) => {
   let doubles = {};
   for (let i = 0; i < gameState.numPlayers; i++) {
     currentPlayers[i].pieces.forEach((x) => {
@@ -194,7 +194,9 @@ const calculateAllowedMoves = (roll, player) => {
     }
   }
 };
-const makeMove = (move, piece, player) => {
+export const makeMove = (move, piece, gs, pturn) => {
+  currentPlayers = Object.assign([], gs);
+  let player = Object.assign({}, currentPlayers[pturn]);
   if (move === -1) {
     let newSquare = player.homeSquare;
     player.pieces[piece] = newSquare;
@@ -215,8 +217,10 @@ const makeMove = (move, piece, player) => {
       player.moveBag[0] === 5 ? [player.moveBag[1]] : [player.moveBag[0]];
     if (pieceTaken) player.moveBag.push(20);
   } else {
+    console.log("move not -1");
     const enemyHomeSquares = homeSquares.filter((i) => i !== player.homeSquare);
     const squareToMove = getSquare(player.pieces[piece], move);
+    console.log("moving to square", squareToMove);
     let pieceTaken = false;
     if (enemyHomeSquares.includes(squareToMove)) {
       currentPlayers[
@@ -235,32 +239,46 @@ const makeMove = (move, piece, player) => {
         at: -1,
       };
     }
+    player.pieces = [...player.pieces];
     player.pieces[piece] = squareToMove;
     // Check for other players
-    for (const p of currentPlayers) {
+    let updatedPlayers = [];
+    for (let j = 0; j < currentPlayers.length; j++) {
+      let p = Object.assign({}, currentPlayers[j]);
       if (p.color === player.color) {
+        console.log("continuing");
+        updatedPlayers.push(p);
         continue;
       }
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
+        console.log(p);
+        console.log(i);
         if (
           p.pieces[i] === squareToMove &&
           !safeSquares.includes(p.pieces[i])
         ) {
           // Take piece
           console.log("take1");
+          p.pieces = [...p.pieces];
           p.pieces[i] = 0;
-          player.moveBag.push(20);
+          player.moveBag = [...player.moveBag, 20];
           player.turns++;
           pieceTaken = true;
         }
       }
+      updatedPlayers.push(p);
     }
+    currentPlayers = Object.assign([], updatedPlayers);
+    console.log(currentPlayers);
     player.moveBag =
       player.moveBag[0] === move ? [player.moveBag[1]] : [player.moveBag[0]];
     if (pieceTaken) player.moveBag.push(20);
   }
   player.pieceOptions = defaultPlayer.pieceOptions;
-  calculateAllowedMoves(player.moveBag, player);
+  calculateAllowedMoves(player.moveBag, player, currentPlayers);
+  currentPlayers[pturn] = player;
+  console.log(currentPlayers);
+  return currentPlayers;
 };
 
 const getSquare = (start, amount) => {

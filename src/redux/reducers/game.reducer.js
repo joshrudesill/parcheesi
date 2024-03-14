@@ -55,6 +55,9 @@ const gameSlice = createSlice({
         return g;
       });
     },
+    makeMoveRedux: (state, action) => {
+      state.gameState = action.payload;
+    },
     setPlayerNumber: (state, action) => {
       state.playerNumber = action.payload;
     },
@@ -73,5 +76,6 @@ export const {
   setTurn,
   takeTurnRedux,
   setPlayerNumber,
+  makeMoveRedux,
 } = gameSlice.actions;
 export default gameSlice.reducer;

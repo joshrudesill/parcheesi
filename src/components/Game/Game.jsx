@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import board from "/src/assets/parchis_board.svg";
 
-import { parseGameIntoMemory, takeTurn } from "../../parcheesi";
+import { makeMove, parseGameIntoMemory, takeTurn } from "../../parcheesi";
 import {
+  makeMoveRedux,
   setGame,
   setPlayerNumber,
   setTurn,
@@ -42,7 +43,6 @@ export default function Game() {
         params: { game: user.current_game },
       });
       dispatch(setTurn(currentGame.data.turn - 1));
-      console.log("cg: ", currentGame);
       parseGameIntoMemory(
         currentGame.data["piece_positions"],
         2,
@@ -80,7 +80,9 @@ export default function Game() {
       <button onClick={() => {}}>leaveGame</button>
       <input type='number'></input>
       <input type='number' step={0.0001}></input>
-      <p>Game: {JSON.stringify(game)}</p>
+      <p>
+        Game: {JSON.stringify(game.gameState[game.playerNumber]?.pieceOptions)}
+      </p>
       <div>
         <button
           onClick={() =>
@@ -95,6 +97,26 @@ export default function Game() {
         >
           Take Turn
         </button>
+        {game.gameState[game.playerNumber]?.pieceOptions.map((po, i) => {
+          if (po.length > 0) {
+            return (
+              <div>
+                Piece at {i}:{" "}
+                {po.map((p) => (
+                  <button
+                    onClick={() =>
+                      dispatch(
+                        makeMoveRedux(makeMove(p, i, game.gameState, game.turn))
+                      )
+                    }
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            );
+          }
+        })}
       </div>
       <div style={{ position: "relative" }}>
         <img
@@ -105,7 +127,7 @@ export default function Game() {
         />
 
         {game.gameState &&
-          game.gameState.map((p) => (
+          game.gameState?.map((p) => (
             <Pieces
               color={p.color}
               pieces={p.pieces}
