@@ -146,6 +146,7 @@ export default function Game() {
       <p>
         Game: {JSON.stringify(game.gameState[game.playerNumber]?.pieceOptions)}
       </p>
+
       <div>
         <button onClick={rollDice} disabled={!myTurn || !canRoll}>
           Take Turn

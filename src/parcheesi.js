@@ -58,6 +58,35 @@ let currentPlayers = [
     canRoll: false,
   },
 ];
+function deepCopy(obj) {
+  // Check if obj is an object or an array
+  if (typeof obj !== "object" || obj === null) {
+    return obj; // Return the obj if it's not an object or an array
+  }
+
+  // Create an empty array or object to store the copied properties
+  const newObj = Array.isArray(obj) ? [] : {};
+
+  // Iterate through each property or element of the obj
+  for (let key in obj) {
+    // Check if the property or element is not inherited from the prototype chain
+    if (obj.hasOwnProperty(key)) {
+      // If the value is a string or not an object, shallow copy it
+      if (
+        typeof obj[key] !== "object" ||
+        obj[key] === null ||
+        obj[key] instanceof String
+      ) {
+        newObj[key] = obj[key];
+      } else {
+        // If the value is an object or an array, deep copy it using recursion
+        newObj[key] = deepCopy(obj[key]);
+      }
+    }
+  }
+
+  return newObj;
+}
 
 let safeSquares = [5, 12, 17, 22, 29, 39, 46, 51, 56, 63, 68];
 //  Actions [ receiveNewGameState<()>, rollDice<()>, movePiece<()> ],
@@ -65,7 +94,8 @@ let safeSquares = [5, 12, 17, 22, 29, 39, 46, 51, 56, 63, 68];
 // "1,1,1,1+2,2,2,2+3,3,3,3+4,4,4,4"
 export const parseGameIntoMemory = (piecePostitions, numPlayers, turn, cb) => {
   console.log("pc, ", piecePostitions);
-  currentPlayers = Object.assign([], currentPlayers);
+  // currentPlayers = Object.assign([], currentPlayers);
+  currentPlayers = deepCopy(currentPlayers);
   gameState.numPlayers = numPlayers;
   gameState.turn = turn;
   // Parse db result into array
@@ -81,12 +111,12 @@ export const parseGameIntoMemory = (piecePostitions, numPlayers, turn, cb) => {
   // Find blocks
 
   for (let i = 0; i < gameState.numPlayers; i++) {
-    console.log(Object.isExtensible(currentPlayers));
-    currentPlayers[i] = { ...currentPlayers[i] };
+    // console.log(Object.isExtensible(currentPlayers));
+    // currentPlayers[i] = { ...currentPlayers[i] };
     currentPlayers[i].pieces = [...currentPlayers[i].pieces];
-    console.log(Object.isExtensible(currentPlayers[i]));
-    console.log(Object.isExtensible(currentPlayers[i].pieces));
-    currentPlayers[i].pieces = [...currentPlayers[i].pieces];
+    // console.log(Object.isExtensible(currentPlayers[i]));
+    // console.log(Object.isExtensible(currentPlayers[i].pieces));
+    // currentPlayers[i].pieces = [...currentPlayers[i].pieces];
     currentPlayers[i].pieces = playerArrays[i];
     currentPlayers[i].lastPiece = { player: lastAt[i][0], at: lastAt[i][1] };
   }
@@ -109,12 +139,15 @@ const setup = (numPlayers, currentPlayers) => {
   return currentPlayers;
 };
 export function takeTurn(gs, pturn) {
-  currentPlayers = Object.assign([], gs);
-  console.log(Object.isExtensible(currentPlayers)); // false
-  console.log(Object.isExtensible(currentPlayers[pturn]));
-  let player = Object.assign({}, currentPlayers[pturn]);
-  console.log(Object.isExtensible(player)); // true
-  console.log(player);
+  // currentPlayers = Object.assign([], gs);
+  // console.log(Object.isExtensible(currentPlayers)); // false
+  // console.log(Object.isExtensible(currentPlayers[pturn]));
+  // let player = Object.assign({}, currentPlayers[pturn]);
+  // console.log(Object.isExtensible(player)); // true
+  // console.log(player);
+  currentPlayers = deepCopy(gs);
+  let player = currentPlayers[pturn];
+
   let roll = [
     Math.floor(Math.random() * 5) + 1,
     Math.floor(Math.random() * 5) + 1,
@@ -138,6 +171,7 @@ export function takeTurn(gs, pturn) {
   return player;
 }
 const calculateAllowedMoves = (roll, player, currentPlayers) => {
+  console.log("cp", Object.isExtensible(player));
   let doubles = {};
   for (let i = 0; i < gameState.numPlayers; i++) {
     currentPlayers[i].pieces.forEach((x) => {
@@ -204,8 +238,10 @@ const calculateAllowedMoves = (roll, player, currentPlayers) => {
   }
 };
 export const makeMove = (move, piece, gs, pturn) => {
-  currentPlayers = Object.assign([], gs);
-  let player = Object.assign({}, currentPlayers[pturn]);
+  // currentPlayers = Object.assign([], gs);
+  // let player = Object.assign({}, currentPlayers[pturn]);
+  currentPlayers = deepCopy(gs);
+  let player = currentPlayers[pturn];
   if (move === -1) {
     let newSquare = player.homeSquare;
     player.pieces[piece] = newSquare;
@@ -232,23 +268,25 @@ export const makeMove = (move, piece, gs, pturn) => {
     console.log("moving to square", squareToMove);
     let pieceTaken = false;
     if (enemyHomeSquares.includes(squareToMove)) {
-      currentPlayers[
-        homeSquares.findIndex((i) => i === squareToMove)
-      ].lastPiece = {
-        player: gameState.turn - 1,
-        at: piece,
-      };
+      const hs = homeSquares.findIndex((i) => i === squareToMove);
+      if (hs !== -1 && hs < currentPlayers.length) {
+        currentPlayers[hs].lastPiece = {
+          player: gameState.turn - 1,
+          at: piece,
+        };
+      }
     }
     // If player starts at enemy home square then moves away, need to reset last at
     if (enemyHomeSquares.includes(player.pieces[piece])) {
-      currentPlayers[
-        homeSquares.findIndex((i) => i === squareToMove)
-      ].lastPiece = {
-        player: -1,
-        at: -1,
-      };
+      const hs = homeSquares.findIndex((i) => i === squareToMove);
+      if (hs !== -1 && hs < currentPlayers.length) {
+        currentPlayers[hs].lastPiece = {
+          player: -1,
+          at: -1,
+        };
+      }
     }
-    player.pieces = [...player.pieces];
+    // player.pieces = [...player.pieces];
     player.pieces[piece] = squareToMove;
     // Check for other players
     let updatedPlayers = [];
@@ -268,7 +306,7 @@ export const makeMove = (move, piece, gs, pturn) => {
         ) {
           // Take piece
           console.log("take1");
-          p.pieces = [...p.pieces];
+          // p.pieces = [...p.pieces];
           p.pieces[i] = 0;
           player.moveBag = [...player.moveBag, 20];
           player.extraRolls++;
@@ -277,7 +315,7 @@ export const makeMove = (move, piece, gs, pturn) => {
       }
       updatedPlayers.push(p);
     }
-    currentPlayers = Object.assign([], updatedPlayers);
+    currentPlayers = updatedPlayers;
     console.log(currentPlayers);
 
     player.moveBag = player.moveBag.filter((m) => m !== move);
