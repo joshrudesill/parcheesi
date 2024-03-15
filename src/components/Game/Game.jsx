@@ -17,9 +17,11 @@ import Pieces from "../Pieces/Pieces";
 export default function Game() {
   const game = useSelector((s) => s.game);
   const user = useSelector((s) => s.user.currentUser);
+
   const dispatch = useDispatch();
   const history = useHistory();
   const [myTurn, setMyTurn] = useState(false);
+  const [canRoll, setCanRoll] = useState(false);
   const [moveBag, setMoveBag] = useState([]);
   const [turnsLeft, setTurnsLeft] = useState(0);
   const [pieceOptions, setPieceOptions] = useState([[], [], [], []]);
@@ -34,9 +36,7 @@ export default function Game() {
       history.push("/play");
     }
   }, [user.current_game]);
-  useEffect(() => {
-    console.log("change");
-  }, [game.gameState[game.playerNumber]]);
+
   useEffect(() => {
     const getInitialGameState = async () => {
       const currentGame = await axios.get("/api/game/cgs", {
@@ -45,7 +45,7 @@ export default function Game() {
       dispatch(setTurn(currentGame.data.turn - 1));
       parseGameIntoMemory(
         currentGame.data["piece_positions"],
-        2,
+        2, // Hard coded for now
         currentGame.data["turn"],
         (gs) => dispatch(setGame(gs))
       );
@@ -55,10 +55,62 @@ export default function Game() {
   useEffect(() => {
     if (game.turn === game.playerNumber) {
       setMyTurn(true);
+      setCanRoll(true);
     } else {
       setMyTurn(false);
     }
   }, [game.turn, game.playerNumber]);
+
+  useEffect(() => {
+    console.log();
+    if (
+      game.gameState[game.playerNumber]?.extraRolls > 0 &&
+      game.gameState[game.playerNumber]?.moveBag.length === 0
+    ) {
+      setCanRoll(true);
+    }
+  }, [
+    game.gameState[game.playerNumber]?.extraRolls,
+    game.gameState[game.playerNumber]?.moveBag.length,
+    game?.playerNumber,
+  ]);
+  useEffect(() => {
+    if (
+      game.gameState[game.playerNumber]?.extraRolls === 0 &&
+      game.gameState[game.playerNumber]?.moveBag.length === 0 &&
+      !canRoll
+    ) {
+      console.log("TURN OVER");
+      setMyTurn(false);
+      let newGSPos = "";
+      let newGSLastAt = "#";
+      for (let i = 0; i < 4; i++) {
+        const gs = game.gameState.at(i);
+        let s = "";
+        let l = "";
+        if (gs) {
+          s += gs.pieces.join(",");
+          l += `${gs.lastPiece.player},${gs.lastPiece.at}`;
+        } else {
+          s += "0,0,0,0";
+          l += "-1,-1";
+        }
+        if (i !== 3) {
+          s += "+";
+          l += "+";
+        }
+        newGSPos = newGSPos.concat(s);
+        newGSLastAt = newGSLastAt.concat(l);
+      }
+      const nextTurn = game.turn + 1 < game.players.length ? game.turn + 1 : 0;
+      socket.emit("next-turn", newGSPos.concat(newGSLastAt), nextTurn);
+    }
+  }, [
+    game.gameState[game.playerNumber]?.extraRolls,
+    game.gameState[game.playerNumber]?.moveBag.length,
+    canRoll,
+  ]);
+
   const leaveGame = async () => {
     try {
       const res = await axios.put("/api/game/exitgame");
@@ -71,6 +123,17 @@ export default function Game() {
       console.error(e);
     }
   };
+
+  const rollDice = () => {
+    setCanRoll(false);
+    dispatch(
+      takeTurnRedux({
+        gs: takeTurn(game.gameState, game.turn),
+        turn: game.turn,
+      })
+    );
+  };
+
   const [piecePosition, setPiecePosition] = useState({ x: 0, y: 0 });
   const boardRef = useRef();
 
@@ -84,17 +147,7 @@ export default function Game() {
         Game: {JSON.stringify(game.gameState[game.playerNumber]?.pieceOptions)}
       </p>
       <div>
-        <button
-          onClick={() =>
-            dispatch(
-              takeTurnRedux({
-                gs: takeTurn(game.gameState, game.turn),
-                turn: game.turn,
-              })
-            )
-          }
-          disabled={!myTurn}
-        >
+        <button onClick={rollDice} disabled={!myTurn || !canRoll}>
           Take Turn
         </button>
         {game.gameState[game.playerNumber]?.pieceOptions.map((po, i) => {

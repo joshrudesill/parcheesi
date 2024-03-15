@@ -7,7 +7,7 @@ let defaultPlayer = {
   pieces: [-1, -1, -1, -1],
   moveBag: [],
   color: "",
-  turns: 0,
+  extraRolls: 0,
   pieceOptions: [[], [], [], []],
 };
 let blocks = {};
@@ -18,7 +18,7 @@ let currentPlayers = [
     moveBag: [],
     color: "yellow",
     homeSquare: 5,
-    turns: 1,
+    extraRolls: 1,
     pieceOptions: [[], [], [], []],
     lastPiece: { player: -1, at: -1 },
     canMovePieces: false,
@@ -29,7 +29,7 @@ let currentPlayers = [
     moveBag: [],
     color: "blue",
     homeSquare: 22,
-    turns: 1,
+    extraRolls: 1,
     pieceOptions: [[], [], [], []],
     lastPiece: { player: -1, at: -1 },
     canMovePieces: false,
@@ -40,7 +40,7 @@ let currentPlayers = [
     moveBag: [],
     color: "red",
     homeSquare: 39,
-    turns: 1,
+    extraRolls: 1,
     pieceOptions: [[], [], [], []],
     lastPiece: { player: -1, at: -1 },
     canMovePieces: false,
@@ -51,7 +51,7 @@ let currentPlayers = [
     moveBag: [],
     color: "green",
     homeSquare: 56,
-    turns: 1,
+    extraRolls: 1,
     pieceOptions: [[], [], [], []],
     lastPiece: { player: -1, at: -1 },
     canMovePieces: false,
@@ -64,6 +64,8 @@ let safeSquares = [5, 12, 17, 22, 29, 39, 46, 51, 56, 63, 68];
 //  State [ moveBag<[]>, turnsLeft<int> (for rolling doubles), pieceOptions<[[]]>, pieces<[]>, turn<int>, numPlayers<int>, canMovePieces<bool>, canRoll<bool> ]
 // "1,1,1,1+2,2,2,2+3,3,3,3+4,4,4,4"
 export const parseGameIntoMemory = (piecePostitions, numPlayers, turn, cb) => {
+  console.log("pc, ", piecePostitions);
+  currentPlayers = Object.assign([], currentPlayers);
   gameState.numPlayers = numPlayers;
   gameState.turn = turn;
   // Parse db result into array
@@ -75,15 +77,22 @@ export const parseGameIntoMemory = (piecePostitions, numPlayers, turn, cb) => {
   const playerArrays = gameNotation[0]
     .split("+")
     .map((i) => i.split(",").map((j) => Number(j)));
-  setup(numPlayers);
+  currentPlayers = setup(numPlayers, currentPlayers);
   // Find blocks
+
   for (let i = 0; i < gameState.numPlayers; i++) {
+    console.log(Object.isExtensible(currentPlayers));
+    currentPlayers[i] = { ...currentPlayers[i] };
+    currentPlayers[i].pieces = [...currentPlayers[i].pieces];
+    console.log(Object.isExtensible(currentPlayers[i]));
+    console.log(Object.isExtensible(currentPlayers[i].pieces));
+    currentPlayers[i].pieces = [...currentPlayers[i].pieces];
     currentPlayers[i].pieces = playerArrays[i];
     currentPlayers[i].lastPiece = { player: lastAt[i][0], at: lastAt[i][1] };
   }
   cb(currentPlayers);
 };
-const setup = (numPlayers) => {
+const setup = (numPlayers, currentPlayers) => {
   // Error checking
   if (numPlayers < 2) {
     console.error("Must have more than 2 players in setup");
@@ -97,7 +106,7 @@ const setup = (numPlayers) => {
   if (numPlayers !== 4) {
     currentPlayers.splice(numPlayers, 4 - numPlayers);
   }
-  board = new Uint8ClampedArray(68).map((_, i) => i);
+  return currentPlayers;
 };
 export function takeTurn(gs, pturn) {
   currentPlayers = Object.assign([], gs);
@@ -114,11 +123,11 @@ export function takeTurn(gs, pturn) {
 
   // Check if any pieces at home still, if so force removal on 5
   if (roll[0] === roll[1]) {
-    player.turns += 1;
+    player.extraRolls += 1;
     if (roll[0] === 5) {
     }
   } else if (roll[0] === 6 || roll[1] === 6) {
-    player.turns += 1;
+    player.extraRolls += 1;
   }
 
   // When one 5 is rolled
@@ -206,7 +215,7 @@ export const makeMove = (move, piece, gs, pturn) => {
       blocks.hasOwnProperty(player.homeSquare)
     ) {
       currentPlayers[player.lastPiece.player].pieces[player.lastPiece.at] = 0;
-      player.turns++;
+      player.extraRolls++;
       pieceTaken = true;
       player.lastAt = { player: -1, at: -1 };
     }
@@ -262,7 +271,7 @@ export const makeMove = (move, piece, gs, pturn) => {
           p.pieces = [...p.pieces];
           p.pieces[i] = 0;
           player.moveBag = [...player.moveBag, 20];
-          player.turns++;
+          player.extraRolls++;
           pieceTaken = true;
         }
       }
@@ -270,9 +279,8 @@ export const makeMove = (move, piece, gs, pturn) => {
     }
     currentPlayers = Object.assign([], updatedPlayers);
     console.log(currentPlayers);
-    player.moveBag =
-      player.moveBag[0] === move ? [player.moveBag[1]] : [player.moveBag[0]];
-    if (pieceTaken) player.moveBag.push(20);
+
+    player.moveBag = player.moveBag.filter((m) => m !== move);
   }
   player.pieceOptions = defaultPlayer.pieceOptions;
   calculateAllowedMoves(player.moveBag, player, currentPlayers);

@@ -47,10 +47,13 @@ const gameSlice = createSlice({
     },
     takeTurnRedux: (state, action) => {
       const { turn, gs } = action.payload;
-      console.log(gs);
+
       state.gameState = state.gameState.map((g, i) => {
         if (i === turn) {
-          return gs;
+          return {
+            ...gs,
+            extraRolls: 0,
+          };
         }
         return g;
       });

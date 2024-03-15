@@ -41,6 +41,7 @@ io.on("connection", (socket) => {
     socket.emit("hi", true);
   });
   socket.on("join-game-room", (gameRoom, username) => {
+    console.log("join-gameroom");
     socket.gameRoom = gameRoom;
     socket.username = username;
 
@@ -54,11 +55,14 @@ io.on("connection", (socket) => {
     io.to(gameRoom).emit("player-joined", roomData[gameRoom]);
   });
   socket.on("leaving-gameroom", () => {
+    console.log("leaving-gameroom");
     if (roomData[socket.gameRoom]) {
       roomData[socket.gameRoom] = roomData[socket.gameRoom].filter(
         (i) => i !== socket.username
       );
       socket.leave(socket.gameRoom);
+      delete socket.gameRoom;
+      delete socket.username;
       io.to(socket.gameRoom).emit(
         "leaving-gameroom",
         roomData[socket.gameRoom]
@@ -66,20 +70,27 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("disconnect", async () => {
+    console.log("DC");
+    console.log(roomData);
     if (roomData[socket.gameRoom]) {
+      console.log("1");
       if (roomData[socket.gameRoom].started) {
+        console.log("2");
         // Player left while in game, need to end whole game
         await pool.query(
           `UPDATE "user" SET current_game = null WHERE current_game = $1;`,
           [socket.gameRoom]
         );
-        delete roomData[socket.gameRoom];
-        console.log(roomData);
         io.to(socket.gameRoom).emit("gameover", "player-left");
+        delete roomData[socket.gameRoom];
+        delete socket.gameRoom;
+        delete socket.username;
       } else {
         roomData[socket.gameRoom] = roomData[socket.gameRoom].filter(
           (i) => i !== socket.username
         );
+        delete socket.gameRoom;
+        delete socket.username;
         io.to(socket.gameRoom).emit(
           "leaving-gameroom",
           roomData[socket.gameRoom]
@@ -88,14 +99,17 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("leaving-startedgame", async () => {
+    console.log("leaving-started");
     if (roomData[socket.gameRoom]) {
       // end game in sql
       await pool.query(
         `UPDATE "user" SET current_game = null WHERE current_game = $1;`,
         [socket.gameRoom]
       );
-      delete roomData[socket.gameRoom];
       console.log(roomData);
+      delete roomData[socket.gameRoom];
+      delete socket.gameRoom;
+      delete socket.username;
       io.to(socket.gameRoom).emit("gameover", "player-left");
     }
   });
@@ -103,6 +117,16 @@ io.on("connection", (socket) => {
     if (roomData[socket.gameRoom]) {
       roomData[socket.gameRoom].started = true;
       io.to(socket.gameRoom).emit("game-start");
+    }
+  });
+  socket.on("next-turn", async (newGS, turn) => {
+    console.log("next-turn:", socket.gameRoom);
+    if (roomData[socket.gameRoom]) {
+      await pool.query(
+        "UPDATE game_state SET piece_positions = $1, turn = $3 WHERE game_code = $2;",
+        [newGS, socket.gameRoom, turn + 1]
+      );
+      io.to(socket.gameRoom).emit("advance-turn", socket.gameRoom);
     }
   });
 });

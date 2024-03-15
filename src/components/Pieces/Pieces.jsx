@@ -85,7 +85,7 @@ export default function Pieces({ color, pieces, boardWidth }) {
       out.push(newPos);
     }
     return out;
-  }, [pieces]);
+  }, [...pieces]);
 
   const homeCoords = {
     green: { left: 65, top: 65 },

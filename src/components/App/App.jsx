@@ -26,9 +26,13 @@ import {
   addPlayer,
   gameReset,
   setAdmin,
+  setGame,
   setGameStarted,
+  setTurn,
 } from "../../redux/reducers/game.reducer";
 import Game from "../Game/Game";
+import axios from "axios";
+import { parseGameIntoMemory } from "../../parcheesi";
 
 function App() {
   const dispatch = useDispatch();
@@ -69,6 +73,19 @@ function App() {
     });
     socket.on("game-start", () => {
       dispatch(setGameStarted(true));
+    });
+    socket.on("advance-turn", async (cg) => {
+      const currentGame = await axios.get("/api/game/cgs", {
+        params: { game: cg },
+      });
+      console.log("CGGGG:", currentGame);
+      dispatch(setTurn(currentGame.data.turn - 1));
+      parseGameIntoMemory(
+        currentGame.data["piece_positions"],
+        2,
+        currentGame.data["turn"],
+        (gs) => dispatch(setGame(gs))
+      );
     });
 
     return () => {
