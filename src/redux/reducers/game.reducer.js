@@ -52,7 +52,7 @@ const gameSlice = createSlice({
         if (i === turn) {
           return {
             ...gs,
-            extraRolls: 0,
+            extraRolls: gs.extraRolls - 1,
           };
         }
         return g;

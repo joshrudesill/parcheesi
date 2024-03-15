@@ -59,19 +59,14 @@ let currentPlayers = [
   },
 ];
 function deepCopy(obj) {
-  // Check if obj is an object or an array
   if (typeof obj !== "object" || obj === null) {
     return obj; // Return the obj if it's not an object or an array
   }
 
-  // Create an empty array or object to store the copied properties
   const newObj = Array.isArray(obj) ? [] : {};
 
-  // Iterate through each property or element of the obj
   for (let key in obj) {
-    // Check if the property or element is not inherited from the prototype chain
     if (obj.hasOwnProperty(key)) {
-      // If the value is a string or not an object, shallow copy it
       if (
         typeof obj[key] !== "object" ||
         obj[key] === null ||
@@ -79,7 +74,6 @@ function deepCopy(obj) {
       ) {
         newObj[key] = obj[key];
       } else {
-        // If the value is an object or an array, deep copy it using recursion
         newObj[key] = deepCopy(obj[key]);
       }
     }
@@ -152,7 +146,7 @@ export function takeTurn(gs, pturn) {
     Math.floor(Math.random() * 5) + 1,
     Math.floor(Math.random() * 5) + 1,
   ];
-  roll = [1, 4];
+  //roll = [3, 3];
 
   // Check if any pieces at home still, if so force removal on 5
   if (roll[0] === roll[1]) {
@@ -317,8 +311,18 @@ export const makeMove = (move, piece, gs, pturn) => {
     }
     currentPlayers = updatedPlayers;
     console.log(currentPlayers);
-
-    player.moveBag = player.moveBag.filter((m) => m !== move);
+    let oneDelete = false;
+    player.moveBag = player.moveBag.filter((m) => {
+      if (oneDelete) {
+        return true;
+      }
+      if (m !== move) {
+        return true;
+      } else {
+        oneDelete = true;
+        return false;
+      }
+    });
   }
   player.pieceOptions = defaultPlayer.pieceOptions;
   calculateAllowedMoves(player.moveBag, player, currentPlayers);
