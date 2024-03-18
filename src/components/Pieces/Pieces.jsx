@@ -4,47 +4,56 @@ import blue from "/src/assets/blue.svg";
 import { useEffect, useMemo, useState } from "react";
 export default function Pieces({ color, pieces, boardWidth }) {
   const gameState = useSelector((s) => s.game.gameState);
-  const getPiecePosition = (square) => {
+  const [s, sets] = useState(0.047);
+  const getPiecePosition = (square, step) => {
     if (square === 0) {
       return { x: 0, y: 0 };
     }
     let x = 0;
     let y = 0;
-    let step = 0.045;
+    //let step = 0.47;
     let step2 = 0.0453;
     switch (position.findIndex((i) => i.includes(square))) {
       case 0:
-        x = 1 - position[0].findIndex((i) => i === square) * step2;
-        y = 0.4;
+        x = 1 - position[0].findIndex((i) => i === square) * step;
+        x -= 0.003;
+        y = 0.3975;
         break;
       case 1:
         x = 0.64;
         y = (8 - position[1].findIndex((i) => i === square)) * step;
+        y -= 0.005;
         break;
       //
       case 2:
-        x = 0.4;
+        x = 0.3975;
         y = (position[2].findIndex((i) => i === square) + 1) * step;
+        y -= 0.005;
         break;
       //
       case 3:
-        x = (8 - position[3].findIndex((i) => i === square)) * step2;
-        y = 0.4;
+        x = (8 - position[3].findIndex((i) => i === square)) * step;
+        y = 0.3975;
+        x -= 0.006;
         break;
       case 4:
-        x = (position[4].findIndex((i) => i === square) + 1) * step2;
+        x = (position[4].findIndex((i) => i === square) + 1) * step;
         y = 0.64;
+        x -= 0.006;
         break;
       case 5:
-        x = 0.4;
+        x = 0.3975;
         y = 1 - (7 - position[5].findIndex((i) => i === square)) * step;
+        y -= 0.005;
         break;
       case 6:
         x = 0.64;
         y = 1 - position[6].findIndex((i) => i === square) * step;
+        y -= 0.005;
         break;
       case 7:
-        x = 1 - (7 - position[7].findIndex((i) => i === square)) * step2;
+        x = 1 - (7 - position[7].findIndex((i) => i === square)) * step;
+        x -= 0.003;
         y = 0.64;
         break;
       case -1:
@@ -79,13 +88,14 @@ export default function Pieces({ color, pieces, boardWidth }) {
   const position = [lb, lbb, rbb, rb, rt, rtt, ltt, lt];
   const p = useMemo(() => {
     let out = [];
+    console.log("memo");
     for (const piece of pieces) {
-      const newPos = getPiecePosition(piece);
+      const newPos = getPiecePosition(piece, s);
 
       out.push(newPos);
     }
     return out;
-  }, [...pieces]);
+  }, [...pieces, s]);
 
   const homeCoords = {
     green: { left: 65, top: 65 },
@@ -99,24 +109,45 @@ export default function Pieces({ color, pieces, boardWidth }) {
     { left: 0, top: 30 },
     { left: 100, top: 0 },
   ];
-
+  const [t, sett] = useState(3);
+  const [c, setc] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    setc({ ...getPiecePosition(t, s) });
+  }, [t]);
   return (
     <>
-      {p.map(
-        (p) =>
-          p.x !== 0 &&
-          p.y !== 0 && (
-            <img
-              src={color === "yellow" ? red : blue}
-              width={30}
-              style={{
-                position: "absolute",
-                left: p.x,
-                top: p.y,
-              }}
-            />
-          )
-      )}
+      <input
+        value={s}
+        onChange={(e) => sets(e.target.value)}
+        type='number'
+        step={0.001}
+      />
+      <input
+        value={t}
+        onChange={(e) => sett(Number(e.target.value))}
+        type='number'
+      />
+      {p.map((p) => (
+        <img
+          src={color === "yellow" ? red : blue}
+          width={30}
+          style={{
+            position: "absolute",
+            left: p.x,
+            top: p.y,
+          }}
+        />
+      ))}
+      <img
+        src={color === "yellow" ? red : blue}
+        width={30}
+        style={{
+          position: "absolute",
+
+          left: c.x,
+          top: c.y,
+        }}
+      />
       <div
         style={{
           position: "absolute",

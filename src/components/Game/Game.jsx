@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { socket } from "../../../socket";
 import { useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import board from "/src/assets/parchis_board.svg";
+import board from "/src/assets/board.svg";
 
 import { makeMove, parseGameIntoMemory, takeTurn } from "../../parcheesi";
 import {
