@@ -94,10 +94,10 @@ export default function Pieces({ color, pieces, boardWidth }) {
     red: { left: 610, top: 65 },
   };
   const homePieceCoords = [
-    { left: 0, top: 100 },
-    { right: 30, top: 0 },
-    { left: 30, top: 0 },
-    { left: 0, top: 100 },
+    { left: 100, top: 0 },
+    { right: 0, top: -30 },
+    { left: 0, top: 30 },
+    { left: 100, top: 0 },
   ];
 
   return (

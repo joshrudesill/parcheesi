@@ -4,6 +4,7 @@ import {
   Redirect,
   Route,
   Switch,
+  Link,
 } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +20,7 @@ import LoginPage from "../LoginPage/LoginPage";
 import RegisterPage from "../RegisterPage/RegisterPage";
 import { socket } from "../../../socket";
 
-import "./App.css";
+import "../../index.css";
 import Play from "../Play/Play";
 import Lobby from "../Lobby/Lobby";
 import {
@@ -33,6 +34,7 @@ import {
 import Game from "../Game/Game";
 import axios from "axios";
 import { parseGameIntoMemory } from "../../parcheesi";
+import LogOutButton from "../LogOutButton/LogOutButton";
 
 function App() {
   const dispatch = useDispatch();
@@ -101,10 +103,19 @@ function App() {
 
   return (
     <Router>
-      <div>
-        <Nav />
-        <div>{isConnected ? "CONN" : "N-CONN"}</div>
-        <div>{JSON.stringify(fooEvents)}</div>
+      <div className='bg-gradient-to-br from-slate-600 via-slate-500 to-slate-900 h-[1100px] p-2 '>
+        <div className='flex flex-row gap-1'>
+          <Link to='/'>
+            <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
+              Home
+            </h1>
+          </Link>
+          {user.id && (
+            <>
+              <LogOutButton className='navLink' />
+            </>
+          )}
+        </div>
         <Switch>
           {/* Visiting localhost:5173 will redirect to localhost:5173/home */}
           <Redirect exact from='/' to='/home' />
@@ -178,8 +189,7 @@ function App() {
               // redirect them to the /user page
               <Redirect to='/play' />
             ) : (
-              // Otherwise, show the Landing page
-              <LandingPage />
+              <InfoPage />
             )}
           </Route>
 

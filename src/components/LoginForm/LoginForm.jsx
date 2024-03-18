@@ -26,39 +26,58 @@ function LoginForm() {
   }; // end login
 
   return (
-    <form className='formPanel' onSubmit={login}>
-      <h2>Login</h2>
+    <form onSubmit={login}>
+      <h2 className='text-2xl font-light mb-3'>Login</h2>
       {errors.loginMessage && (
         <h3 className='alert' role='alert'>
           {errors.loginMessage}
         </h3>
       )}
       <div>
-        <label htmlFor='username'>
-          Username:
+        <div className='mb-5'>
+          <label
+            for='username'
+            className='block mb-2 text-md font-medium text-gray-900 dark:text-white'
+          >
+            username
+          </label>
           <input
             type='text'
-            name='username'
+            id='username'
+            className='border block w-full p-2.5 bg-gray-800 border-gray-700 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500 rounded-md'
+            placeholder='parcheesifan1'
             required
             value={username}
             onChange={(event) => setUsername(event.target.value)}
           />
-        </label>
+        </div>
       </div>
       <div>
-        <label htmlFor='password'>
-          Password:
+        <div className='mb-5'>
+          <label
+            for='username'
+            className='block mb-2 text-md font-medium text-gray-900'
+          >
+            password
+          </label>
           <input
-            type='password'
-            name='password'
+            type='text'
+            id='password'
+            className='border block w-full p-2.5 bg-gray-800 border-gray-700 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500 rounded-md '
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-        </label>
+        </div>
       </div>
-      <div>
-        <input className='btn' type='submit' name='submit' value='Log In' />
+
+      <div className='mb-2'>
+        <input
+          type='submit'
+          name='submit'
+          value='Log In'
+          className='px-4 py-2 rounded-md border border-black  text-neutarl-700 text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200'
+        />
       </div>
     </form>
   );

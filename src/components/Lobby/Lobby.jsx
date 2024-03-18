@@ -8,6 +8,7 @@ import {
   setAdmin,
   setGameStarted,
 } from "../../redux/reducers/game.reducer";
+import { Meteors } from "../Meteors/Meteors";
 
 export default function Lobby() {
   const user = useSelector((s) => s.user.currentUser);
@@ -84,13 +85,51 @@ export default function Lobby() {
   };
   return (
     <div>
-      <h2>{user.current_game}</h2>
-      <button onClick={leaveGame}>Leave</button>
-      <button onClick={startGame}>start</button>
-      <div>
-        {game.players.map((p) => (
-          <p>{p}</p>
-        ))}
+      <div className='w-full flex justify-center pt-24'>
+        <div className=''>
+          <div className='w-[600px] relative h-[300px]'>
+            <div className='absolute inset-0 h-full w-full bg-gradient-to-r from-blue-500 to-teal-500 transform scale-[0.80] bg-red-500 rounded-full blur-3xl' />
+            <div className='relative shadow-xl bg-gray-900 border border-gray-800  px-4 py-8 h-full overflow-hidden rounded-2xl flex flex-col justify-between items-start gap-2'>
+              <h2 className='font-light text-xl text-neutral-300'>
+                code - {user.current_game}
+              </h2>
+              <div>
+                <button
+                  className='px-4 py-2 rounded-md border border-black text-lime-600 text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 me-2 hover:bg-lime-500 hover:text-black'
+                  onClick={startGame}
+                >
+                  start game
+                </button>
+                <button
+                  className='px-4 py-2 rounded-md border border-black text-rose-600 text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 me-2 hover:bg-rose-600 hover:text-black'
+                  onClick={leaveGame}
+                >
+                  leave lobby
+                </button>
+              </div>
+              <div className='grid grid-cols-2 grid-rows-2 w-full gap-2'>
+                {Array(4)
+                  .fill(0)
+                  .map((p, i) => {
+                    if (game.players[i]) {
+                      return (
+                        <div className='border border-neutral-400 rounded-md p-2 text-neutral-400'>
+                          {game.players[i]}
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className='border border-neutral-400 rounded-md p-2 text-neutral-400'>
+                        waiting..
+                      </div>
+                    );
+                  })}
+              </div>
+
+              <Meteors number={20} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
