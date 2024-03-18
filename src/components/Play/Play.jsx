@@ -31,7 +31,7 @@ export default function Play() {
           <div className='relative shadow-xl bg-gray-900 border border-gray-800  px-4 py-8 h-full overflow-hidden rounded-2xl flex flex-col justify-around items-start gap-2'>
             <h2 className='font-light text-xl text-neutral-300'>let's play</h2>
             <button
-              className='text-gray-200 border border-gray-400 p-2 rounded-md hover:bg-white hover:text-black '
+              className='text-gray-200 border border-gray-400 p-2 rounded-md hover:bg-white hover:text-black bg-gray-900 z-100'
               onClick={gameInit}
             >
               create game

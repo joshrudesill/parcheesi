@@ -2,7 +2,13 @@ import { useSelector } from "react-redux";
 import red from "/src/assets/red.svg";
 import blue from "/src/assets/blue.svg";
 import { useEffect, useMemo, useState } from "react";
-export default function Pieces({ color, pieces, boardWidth }) {
+export default function Pieces({
+  color,
+  pieces,
+  boardWidth,
+  doubles,
+  iteration,
+}) {
   const gameState = useSelector((s) => s.game.gameState);
   const [s, sets] = useState(0.047);
   const getPiecePosition = (square, step) => {
@@ -92,7 +98,7 @@ export default function Pieces({ color, pieces, boardWidth }) {
     for (const piece of pieces) {
       const newPos = getPiecePosition(piece, s);
 
-      out.push(newPos);
+      out.push({ ...newPos, at: piece });
     }
     return out;
   }, [...pieces, s]);
@@ -127,17 +133,76 @@ export default function Pieces({ color, pieces, boardWidth }) {
         onChange={(e) => sett(Number(e.target.value))}
         type='number'
       />
-      {p.map((p) => (
-        <img
-          src={color === "yellow" ? red : blue}
-          width={30}
-          style={{
-            position: "absolute",
-            left: p.x,
-            top: p.y,
-          }}
-        />
-      ))}
+      {p.map((p) => {
+        if (
+          Object.values(doubles)
+            .map((e) => e.at)
+            .includes(p.at)
+        ) {
+          if (iteration === 0) {
+            if (horizontals.includes(p.at)) {
+              const colors = Object.values(doubles).map((c) => c.color);
+              return (
+                <>
+                  <img
+                    src={blue}
+                    width={30}
+                    style={{
+                      position: "absolute",
+                      left: p.x,
+                      top: p.y + 20,
+                    }}
+                  />
+                  <img
+                    src={blue}
+                    width={30}
+                    style={{
+                      position: "absolute",
+                      left: p.x,
+                      top: p.y - 20,
+                    }}
+                  />
+                </>
+              );
+            } else {
+              return (
+                <>
+                  <img
+                    src={blue}
+                    width={30}
+                    style={{
+                      position: "absolute",
+                      left: p.x + 20,
+                      top: p.y,
+                    }}
+                  />
+                  <img
+                    src={blue}
+                    width={30}
+                    style={{
+                      position: "absolute",
+                      left: p.x - 20,
+                      top: p.y,
+                    }}
+                  />
+                </>
+              );
+            }
+          }
+        } else {
+          return (
+            <img
+              src={color === "yellow" ? red : blue}
+              width={30}
+              style={{
+                position: "absolute",
+                left: p.x,
+                top: p.y,
+              }}
+            />
+          );
+        }
+      })}
       <img
         src={color === "yellow" ? red : blue}
         width={30}

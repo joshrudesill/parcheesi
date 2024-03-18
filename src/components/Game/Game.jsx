@@ -15,16 +15,36 @@ import {
 } from "../../redux/reducers/game.reducer";
 import Pieces from "../Pieces/Pieces";
 export default function Game() {
-  const game = useSelector((s) => s.game);
+  const { game, doubles } = useSelector((s) => {
+    // doubles {square: 1, colors: ['red', 'blue']}
+    let concatGS = [];
+    let dObj = {};
+    let doubles = [];
+    for (let gs of s.game.gameState) {
+      for (let p of gs.pieces) {
+        concatGS = concatGS.concat({
+          at: p,
+          color: gs.color,
+        });
+      }
+    }
+    for (const d of concatGS) {
+      if (dObj[d.at]) {
+        doubles.push({ at: d.at, colors: dObj[d.at].concat(d.color) });
+      } else {
+        if (d.at !== 0) {
+          dObj[d.at] = [d.color];
+        }
+      }
+    }
+    return { game: s.game, doubles };
+  });
   const user = useSelector((s) => s.user.currentUser);
 
   const dispatch = useDispatch();
   const history = useHistory();
   const [myTurn, setMyTurn] = useState(false);
   const [canRoll, setCanRoll] = useState(false);
-  const [moveBag, setMoveBag] = useState([]);
-  const [turnsLeft, setTurnsLeft] = useState(0);
-  const [pieceOptions, setPieceOptions] = useState([[], [], [], []]);
 
   useEffect(() => {
     dispatch(
@@ -181,10 +201,12 @@ export default function Game() {
         />
 
         {game.gameState &&
-          game.gameState?.map((p) => (
+          game.gameState?.map((p, i) => (
             <Pieces
               color={p.color}
               pieces={p.pieces}
+              doubles={doubles}
+              iteration={i}
               boardWidth={boardRef.current.getBoundingClientRect().width}
             />
           ))}

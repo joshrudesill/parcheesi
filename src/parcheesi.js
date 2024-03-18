@@ -146,7 +146,7 @@ export function takeTurn(gs, pturn) {
     Math.floor(Math.random() * 5) + 1,
     Math.floor(Math.random() * 5) + 1,
   ];
-  //roll = [3, 3];
+  roll = [2, 3];
 
   // Check if any pieces at home still, if so force removal on 5
   if (roll[0] === roll[1]) {
@@ -165,7 +165,6 @@ export function takeTurn(gs, pturn) {
   return player;
 }
 const calculateAllowedMoves = (roll, player, currentPlayers) => {
-  console.log("cp", Object.isExtensible(player));
   let doubles = {};
   for (let i = 0; i < gameState.numPlayers; i++) {
     currentPlayers[i].pieces.forEach((x) => {
@@ -190,13 +189,18 @@ const calculateAllowedMoves = (roll, player, currentPlayers) => {
   } else {
     for (let j = 0; j < 4; j++) {
       const piece = player.pieces[j];
+      // if piece is in garage, continue
       // console.log("Checking piece at:", piece);
       if (piece !== 0) {
         let out = [...roll];
         for (let i = 0; i < roll.length; i++) {
           // console.log("Checking roll:", roll[i]);
           for (let x = 1; x <= roll[i]; x++) {
-            const next = getSquare(piece, x);
+            const next = getSquare(piece, x); // get square needs to get modified to look for color
+            // if next square is in driveway,
+            // check if move it out of bounds
+            // if so take move out of pieceoptions
+            // else leave in
             //   console.log("Next square is:", next);
             if (blocks[next]) {
               // console.log("Block found at:", next);
@@ -256,6 +260,8 @@ export const makeMove = (move, piece, gs, pturn) => {
       player.moveBag[0] === 5 ? [player.moveBag[1]] : [player.moveBag[0]];
     if (pieceTaken) player.moveBag.push(20);
   } else {
+    // if move is on driveway, make move
+    // if move lands in garage, increment pieces home or something like that
     console.log("move not -1");
     const enemyHomeSquares = homeSquares.filter((i) => i !== player.homeSquare);
     const squareToMove = getSquare(player.pieces[piece], move);
