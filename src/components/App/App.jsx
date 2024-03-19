@@ -67,7 +67,11 @@ function App() {
     socket.on("leaving-gameroom", (player) => {
       dispatch(addPlayer(player));
     });
-    socket.on("gameover", (reason) => {
+    socket.on("gameover", (reason, player) => {
+      console.log(reason, player);
+      if (reason === "player-won") {
+        alert(`${player} won`);
+      }
       dispatch(gameReset());
       console.log("gameover");
       // all users should be updated

@@ -45,6 +45,8 @@ export default function Game() {
   const history = useHistory();
   const [myTurn, setMyTurn] = useState(false);
   const [canRoll, setCanRoll] = useState(false);
+  const [roll, setRoll] = useState([]);
+  const [hasRolled, setHasRolled] = useState(false);
 
   useEffect(() => {
     dispatch(
@@ -82,7 +84,6 @@ export default function Game() {
   }, [game.turn, game.playerNumber]);
 
   useEffect(() => {
-    console.log();
     if (
       game.gameState[game.playerNumber]?.extraRolls > 0 &&
       game.gameState[game.playerNumber]?.moveBag.length === 0
@@ -96,6 +97,18 @@ export default function Game() {
   ]);
   useEffect(() => {
     if (
+      roll[0] === roll[1] &&
+      game.gameState[game.playerNumber]?.pieceOptions.every(
+        (po) => po.length === 0
+      ) &&
+      game.gameState[game.playerNumber]?.extraRolls > 0
+    ) {
+      setCanRoll(true);
+    }
+  }, [roll]);
+  useEffect(() => {
+    if (
+      hasRolled &&
       game.gameState[game.playerNumber]?.extraRolls === 0 &&
       game.gameState[game.playerNumber]?.moveBag.length === 0 &&
       !canRoll
@@ -144,11 +157,21 @@ export default function Game() {
     }
   };
 
-  const rollDice = () => {
+  const rollDice = (d = false) => {
+    console.log("setting false");
+    setHasRolled(true);
     setCanRoll(false);
+    let jsRoll = [
+      Math.floor(Math.random() * 5) + 1,
+      Math.floor(Math.random() * 5) + 1,
+    ];
+    if (d) {
+      jsRoll = [5, 3];
+    }
+    setRoll([...jsRoll]);
     dispatch(
       takeTurnRedux({
-        gs: takeTurn(game.gameState, game.turn),
+        gs: takeTurn(game.gameState, game.turn, jsRoll),
         turn: game.turn,
       })
     );
@@ -168,8 +191,26 @@ export default function Game() {
       </p>
 
       <div>
-        <button onClick={rollDice} disabled={!myTurn || !canRoll}>
+        <p>{JSON.stringify(roll)}</p>
+        <button
+          onClick={() => rollDice(false)}
+          disabled={!myTurn || !canRoll}
+          className='p-2 border'
+        >
           Take Turn
+        </button>
+        <button
+          onClick={() => rollDice(true)}
+          disabled={!myTurn || !canRoll}
+          className='p-2 border'
+        >
+          double
+        </button>
+        <button
+          onClick={() => socket.emit("end-game", "player-won", user.username)}
+          className='p-2 border'
+        >
+          end
         </button>
         {game.gameState[game.playerNumber]?.pieceOptions.map((po, i) => {
           if (po.length > 0) {
@@ -193,12 +234,7 @@ export default function Game() {
         })}
       </div>
       <div style={{ position: "relative" }}>
-        <img
-          src={board}
-          width={800}
-          ref={boardRef}
-          style={{ transform: "rotate(90deg)" }}
-        />
+        <img src={board} width={800} ref={boardRef} style={{}} />
 
         {game.gameState &&
           game.gameState?.map((p, i) => (

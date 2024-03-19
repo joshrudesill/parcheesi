@@ -50,9 +50,19 @@ const gameSlice = createSlice({
 
       state.gameState = state.gameState.map((g, i) => {
         if (i === turn) {
+          console.log("et:", gs.extraRolls - 1);
           return {
             ...gs,
-            extraRolls: gs.extraRolls - 1,
+            moveBag:
+              gs.pieceOptions.every((po) => po.length === 0) &&
+              gs.moveBag[0] !== gs.moveBag[1]
+                ? []
+                : gs.moveBag,
+            extraRolls:
+              gs.pieceOptions.every((po) => po.length === 0) &&
+              gs.moveBag[0] !== gs.moveBag[1]
+                ? 0
+                : gs.extraRolls,
           };
         }
         return g;

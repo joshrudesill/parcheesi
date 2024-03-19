@@ -106,11 +106,25 @@ io.on("connection", (socket) => {
         `UPDATE "user" SET current_game = null WHERE current_game = $1;`,
         [socket.gameRoom]
       );
-      console.log(roomData);
+      io.to(socket.gameRoom).emit("gameover", "player-left");
       delete roomData[socket.gameRoom];
       delete socket.gameRoom;
       delete socket.username;
-      io.to(socket.gameRoom).emit("gameover", "player-left");
+    }
+  });
+  socket.on("end-game", async (reason, player) => {
+    console.log(player);
+    if (roomData[socket.gameRoom]) {
+      console.log("2");
+      // end game in sql
+      await pool.query(
+        `UPDATE "user" SET current_game = null WHERE current_game = $1;`,
+        [socket.gameRoom]
+      );
+      io.to(socket.gameRoom).emit("gameover", "player-won", player);
+      delete roomData[socket.gameRoom];
+      delete socket.gameRoom;
+      delete socket.username;
     }
   });
   socket.on("notify-game-start", async () => {

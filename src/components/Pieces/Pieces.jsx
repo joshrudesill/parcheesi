@@ -203,7 +203,7 @@ export default function Pieces({
           );
         }
       })}
-      <img
+      {/* <img
         src={color === "yellow" ? red : blue}
         width={30}
         style={{
@@ -212,7 +212,7 @@ export default function Pieces({
           left: c.x,
           top: c.y,
         }}
-      />
+      /> */}
       <div
         style={{
           position: "absolute",

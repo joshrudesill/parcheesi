@@ -18,18 +18,7 @@ let currentPlayers = [
     moveBag: [],
     color: "yellow",
     homeSquare: 5,
-    extraRolls: 1,
-    pieceOptions: [[], [], [], []],
-    lastPiece: { player: -1, at: -1 },
-    canMovePieces: false,
-    canRoll: false,
-  },
-  {
-    pieces: [-1, -1, -1, -1],
-    moveBag: [],
-    color: "blue",
-    homeSquare: 22,
-    extraRolls: 1,
+    extraRolls: 0,
     pieceOptions: [[], [], [], []],
     lastPiece: { player: -1, at: -1 },
     canMovePieces: false,
@@ -40,7 +29,7 @@ let currentPlayers = [
     moveBag: [],
     color: "red",
     homeSquare: 39,
-    extraRolls: 1,
+    extraRolls: 0,
     pieceOptions: [[], [], [], []],
     lastPiece: { player: -1, at: -1 },
     canMovePieces: false,
@@ -50,8 +39,19 @@ let currentPlayers = [
     pieces: [-1, -1, -1, -1],
     moveBag: [],
     color: "green",
+    homeSquare: 39,
+    extraRolls: 0,
+    pieceOptions: [[], [], [], []],
+    lastPiece: { player: -1, at: -1 },
+    canMovePieces: false,
+    canRoll: false,
+  },
+  {
+    pieces: [-1, -1, -1, -1],
+    moveBag: [],
+    color: "blue",
     homeSquare: 56,
-    extraRolls: 1,
+    extraRolls: 0,
     pieceOptions: [[], [], [], []],
     lastPiece: { player: -1, at: -1 },
     canMovePieces: false,
@@ -97,7 +97,6 @@ export const parseGameIntoMemory = (piecePostitions, numPlayers, turn, cb) => {
   const lastAt = gameNotation[1]
     .split("+")
     .map((i) => i.split(",").map((j) => Number(j)));
-  console.log(lastAt);
   const playerArrays = gameNotation[0]
     .split("+")
     .map((i) => i.split(",").map((j) => Number(j)));
@@ -132,7 +131,7 @@ const setup = (numPlayers, currentPlayers) => {
   }
   return currentPlayers;
 };
-export function takeTurn(gs, pturn) {
+export function takeTurn(gs, pturn, roll) {
   // currentPlayers = Object.assign([], gs);
   // console.log(Object.isExtensible(currentPlayers)); // false
   // console.log(Object.isExtensible(currentPlayers[pturn]));
@@ -141,12 +140,12 @@ export function takeTurn(gs, pturn) {
   // console.log(player);
   currentPlayers = deepCopy(gs);
   let player = currentPlayers[pturn];
-
-  let roll = [
-    Math.floor(Math.random() * 5) + 1,
-    Math.floor(Math.random() * 5) + 1,
-  ];
-  roll = [2, 3];
+  player.extraRolls = 0;
+  // let roll = [
+  //   Math.floor(Math.random() * 5) + 1,
+  //   Math.floor(Math.random() * 5) + 1,
+  // ];
+  // roll = [2, 2];
 
   // Check if any pieces at home still, if so force removal on 5
   if (roll[0] === roll[1]) {
@@ -161,11 +160,13 @@ export function takeTurn(gs, pturn) {
   if ((roll[0] === 5 || roll[1] === 5) && !(roll[0] === 5 && roll[1] === 5)) {
   }
   player.moveBag = [...roll];
+
   calculateAllowedMoves(roll, player, currentPlayers);
   return player;
 }
 const calculateAllowedMoves = (roll, player, currentPlayers) => {
   let doubles = {};
+  blocks = {};
   for (let i = 0; i < gameState.numPlayers; i++) {
     currentPlayers[i].pieces.forEach((x) => {
       if (x !== 0) {
@@ -183,6 +184,7 @@ const calculateAllowedMoves = (roll, player, currentPlayers) => {
   if (roll.includes(5) && player.pieces.some((p) => p === 0)) {
     for (let i = 0; i < player.pieces.length; i++) {
       if (player.pieces[i] === 0) {
+        player.pieceOptions = [...player.pieceOptions];
         player.pieceOptions[i] = [-1];
       }
     }
@@ -234,6 +236,7 @@ const calculateAllowedMoves = (roll, player, currentPlayers) => {
       );
     }
   }
+  console.log("blocks", blocks);
 };
 export const makeMove = (move, piece, gs, pturn) => {
   // currentPlayers = Object.assign([], gs);
@@ -256,8 +259,19 @@ export const makeMove = (move, piece, gs, pturn) => {
 
     player.pieceOptions[piece] = [];
     // need to reset lastPiece at some point..
-    player.moveBag =
-      player.moveBag[0] === 5 ? [player.moveBag[1]] : [player.moveBag[0]];
+    let oneDelete = false;
+    player.moveBag = player.moveBag.filter((m) => {
+      if (oneDelete) {
+        return true;
+      }
+      if (m !== 5) {
+        return true;
+      } else {
+        oneDelete = true;
+        return false;
+      }
+    });
+
     if (pieceTaken) player.moveBag.push(20);
   } else {
     // if move is on driveway, make move
@@ -265,7 +279,6 @@ export const makeMove = (move, piece, gs, pturn) => {
     console.log("move not -1");
     const enemyHomeSquares = homeSquares.filter((i) => i !== player.homeSquare);
     const squareToMove = getSquare(player.pieces[piece], move);
-    console.log("moving to square", squareToMove);
     let pieceTaken = false;
     if (enemyHomeSquares.includes(squareToMove)) {
       const hs = homeSquares.findIndex((i) => i === squareToMove);
@@ -293,13 +306,10 @@ export const makeMove = (move, piece, gs, pturn) => {
     for (let j = 0; j < currentPlayers.length; j++) {
       let p = Object.assign({}, currentPlayers[j]);
       if (p.color === player.color) {
-        console.log("continuing");
         updatedPlayers.push(p);
         continue;
       }
       for (let i = 0; i < 4; i++) {
-        console.log(p);
-        console.log(i);
         if (
           p.pieces[i] === squareToMove &&
           !safeSquares.includes(p.pieces[i])
@@ -316,7 +326,6 @@ export const makeMove = (move, piece, gs, pturn) => {
       updatedPlayers.push(p);
     }
     currentPlayers = updatedPlayers;
-    console.log(currentPlayers);
     let oneDelete = false;
     player.moveBag = player.moveBag.filter((m) => {
       if (oneDelete) {
@@ -331,9 +340,10 @@ export const makeMove = (move, piece, gs, pturn) => {
     });
   }
   player.pieceOptions = defaultPlayer.pieceOptions;
+
   calculateAllowedMoves(player.moveBag, player, currentPlayers);
   currentPlayers[pturn] = player;
-  console.log(currentPlayers);
+
   return currentPlayers;
 };
 
