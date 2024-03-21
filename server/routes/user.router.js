@@ -13,6 +13,17 @@ router.get("/", rejectUnauthenticated, (req, res) => {
   // Send back user object from the session (previously queried from the database)
   res.send(req.user);
 });
+router.put("/delete", rejectUnauthenticated, async (req, res) => {
+  console.log(req.body);
+  const id = req.body.id;
+  const queryText = `DELETE FROM "user" where id = $1`;
+  try {
+    await pool.query(queryText, [id]);
+    res.sendStatus(204);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
 
 // Handles POST request with new user data
 // The only thing different from this and every other post we've seen

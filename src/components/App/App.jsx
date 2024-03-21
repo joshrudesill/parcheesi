@@ -35,11 +35,14 @@ import Game from "../Game/Game";
 import axios from "axios";
 import { parseGameIntoMemory } from "../../parcheesi";
 import LogOutButton from "../LogOutButton/LogOutButton";
+import { useHistory } from "react-router-dom";
+import Rules from "../Rules/Rules";
 
 function App() {
   const dispatch = useDispatch();
 
   const user = useSelector((store) => store.user.currentUser);
+  const history = useHistory();
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [fooEvents, setFooEvents] = useState([]);
 
@@ -70,9 +73,10 @@ function App() {
     socket.on("gameover", (reason, player) => {
       console.log(reason, player);
       if (reason === "player-won") {
+        dispatch(gameReset());
         alert(`${player} won`);
       }
-      dispatch(gameReset());
+      // dispatch(gameReset());
       console.log("gameover");
       // all users should be updated
       dispatch({ type: "FETCH_USER" });
@@ -109,7 +113,7 @@ function App() {
    - Style game.js - add move ui also - 30 min - DONE
    - style user page - 30min - DONE
    - add delete account button - 15min
-   - add w/l to db - 15min
+   - add w/l to db - 15min - DONE
    - finish game logic to allow for winning properly - 2-3 hours
    - add rules page - 1hour
 
@@ -122,6 +126,11 @@ function App() {
           <Link to='/'>
             <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
               Home
+            </h1>
+          </Link>
+          <Link to='/rules'>
+            <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
+              Rules
             </h1>
           </Link>
 
@@ -211,6 +220,9 @@ function App() {
             ) : (
               <InfoPage />
             )}
+          </Route>
+          <Route exact path='/rules'>
+            <Rules />
           </Route>
 
           {/* If none of the other routes matched, we will show a 404. */}

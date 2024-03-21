@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setGameCode } from "../../redux/reducers/game.reducer";
+import { gameReset, setGameCode } from "../../redux/reducers/game.reducer";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { Meteors } from "../Meteors/Meteors";
 
@@ -10,6 +10,9 @@ export default function Play() {
   const user = useSelector((s) => s.user.currentUser);
   const history = useHistory();
   const [gameCode, setGameCode] = useState("");
+  useEffect(() => {
+    dispatch(gameReset());
+  }, []);
   useEffect(() => {
     if (user && user.current_game !== null) {
       history.push("/lobby");

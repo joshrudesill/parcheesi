@@ -190,6 +190,11 @@ export default function Game() {
   return (
     <div className='flex flex-row  gap-2 mt-3'>
       <div className='w-64 flex flex-col gap-2'>
+        <h1 className='font-bold'>
+          You are:{" "}
+          {game.gameState[game.playerNumber]?.color?.charAt(0)?.toUpperCase() +
+            game.gameState[game.playerNumber]?.color?.slice(1)}
+        </h1>
         <div className=' border border-1 border-zinc-400 flex flex-col rounded-md p-2 shadow-sm bg-zinc-500 shadow-zinc-600 gap-2 divide-y divide-zinc-400'>
           <h1>Controls</h1>
           <div className='flex gap-2 pt-2'>

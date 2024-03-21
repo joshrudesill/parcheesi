@@ -62,7 +62,7 @@ router.post("/join", rejectUnauthenticated, async (req, res) => {
     res.send(500);
   }
 });
-router.put("/startgame", async (req, res) => {
+router.put("/startgame", rejectUnauthenticated, async (req, res) => {
   try {
     const game = await pool.query(
       'UPDATE "game_state" SET game_started = true WHERE game_code = $1',
@@ -74,7 +74,7 @@ router.put("/startgame", async (req, res) => {
     res.send(500);
   }
 });
-router.put("/exitgame", async (req, res) => {
+router.put("/exitgame", rejectUnauthenticated, async (req, res) => {
   try {
     const game = await pool.query(
       'UPDATE "user" SET current_game = null WHERE id = $1',

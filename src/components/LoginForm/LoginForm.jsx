@@ -36,7 +36,7 @@ function LoginForm() {
       <div>
         <div className='mb-5'>
           <label
-            for='username'
+            htmlFor='username'
             className='block mb-2 text-md font-medium text-gray-900 dark:text-white'
           >
             username
@@ -55,7 +55,7 @@ function LoginForm() {
       <div>
         <div className='mb-5'>
           <label
-            for='username'
+            htmlFor='username'
             className='block mb-2 text-md font-medium text-gray-900'
           >
             password
