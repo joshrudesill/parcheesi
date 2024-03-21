@@ -67,6 +67,7 @@ const gameSlice = createSlice({
         }
         return g;
       });
+      // check gs here based on color to see if all pieces are in garage, if so can socket emit win
     },
     makeMoveRedux: (state, action) => {
       state.gameState = action.payload;

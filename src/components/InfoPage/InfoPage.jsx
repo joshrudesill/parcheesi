@@ -13,7 +13,18 @@ function InfoPage() {
   return (
     <div className='w-full text-center pt-24'>
       <div>
-        <div className='flex flex-row w-[75%] left-[12.5%] relative justify-between mb-2 '>
+        <div className='relative w-[75%] left-[12.5%] overflow-hidden bg-slate-900 flex flex-col items-center justify-center rounded-lg h-[500px]'>
+          <div className='absolute inset-0 w-full h-full bg-slate-900 z-20 [mask-image:radial-gradient(transparent,white)] pointer-events-none' />
+
+          <Boxes />
+          <h1 className={cn("md:text-4xl text-2xl text-red-600 relative z-20")}>
+            Parcheesi
+          </h1>
+          <p className='text-center mt-2 text-neutral-300 relative z-20'>
+            Simple. Unintrusive. Fun.
+          </p>
+        </div>
+        <div className='flex flex-row w-[75%] left-[12.5%] relative justify-end mt-2 gap-2'>
           <button
             className='px-4 py-2 rounded-md border border-black  text-neutral-900 text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200'
             onClick={() => history.push("/login")}
@@ -32,17 +43,6 @@ function InfoPage() {
           >
             rules
           </button>
-        </div>
-        <div className='relative w-[75%] left-[12.5%] overflow-hidden bg-slate-900 flex flex-col items-center justify-center rounded-lg h-[500px]'>
-          <div className='absolute inset-0 w-full h-full bg-slate-900 z-20 [mask-image:radial-gradient(transparent,white)] pointer-events-none' />
-
-          <Boxes />
-          <h1 className={cn("md:text-4xl text-2xl text-red-600 relative z-20")}>
-            Parcheesi
-          </h1>
-          <p className='text-center mt-2 text-neutral-300 relative z-20'>
-            Simple. Unintrusive. Fun.
-          </p>
         </div>
       </div>
     </div>

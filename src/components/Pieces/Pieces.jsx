@@ -105,9 +105,9 @@ export default function Pieces({
 
   const homeCoords = {
     green: { left: 65, top: 65 },
-    yellow: { left: 65, top: 610 },
+    yellow: { left: 33, top: 460 },
     blue: { left: 610, top: 610 },
-    red: { left: 610, top: 65 },
+    red: { left: 460, top: 33 },
   };
   const homePieceCoords = [
     { left: 100, top: 0 },
@@ -122,17 +122,6 @@ export default function Pieces({
   }, [t]);
   return (
     <>
-      <input
-        value={s}
-        onChange={(e) => sets(e.target.value)}
-        type='number'
-        step={0.001}
-      />
-      <input
-        value={t}
-        onChange={(e) => sett(Number(e.target.value))}
-        type='number'
-      />
       {p.map((p) => {
         if (
           Object.values(doubles)
@@ -193,7 +182,7 @@ export default function Pieces({
           return (
             <img
               src={color === "yellow" ? red : blue}
-              width={30}
+              width={25}
               style={{
                 position: "absolute",
                 left: p.x,
@@ -218,7 +207,6 @@ export default function Pieces({
           position: "absolute",
           left: homeCoords[color].left,
           top: homeCoords[color].top,
-          border: "1px solid black",
         }}
       >
         {p.map((p, i) => {

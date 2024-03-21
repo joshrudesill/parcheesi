@@ -15,6 +15,7 @@ let homeSquares = [5, 22, 39, 56];
 let currentPlayers = [
   {
     pieces: [-1, -1, -1, -1],
+    driveway: [101, 102, 103, 104, 105, 106, 107, 108],
     moveBag: [],
     color: "yellow",
     homeSquare: 5,
@@ -27,6 +28,7 @@ let currentPlayers = [
   {
     pieces: [-1, -1, -1, -1],
     moveBag: [],
+    driveway: [111, 112, 113, 114, 115, 116, 117, 118],
     color: "red",
     homeSquare: 39,
     extraRolls: 0,
@@ -39,7 +41,7 @@ let currentPlayers = [
     pieces: [-1, -1, -1, -1],
     moveBag: [],
     color: "green",
-    homeSquare: 39,
+    homeSquare: 22,
     extraRolls: 0,
     pieceOptions: [[], [], [], []],
     lastPiece: { player: -1, at: -1 },
@@ -81,6 +83,12 @@ function deepCopy(obj) {
 
   return newObj;
 }
+
+/**
+ KNOWN PROBLEMS:
+ -If there is a block at porch, and other pieces on the board, and a 5 is rolled, other pieces wont have pieceOptions updated
+ - need to make driveway logic and update getSquare based on comments
+ */
 
 let safeSquares = [5, 12, 17, 22, 29, 39, 46, 51, 56, 63, 68];
 //  Actions [ receiveNewGameState<()>, rollDice<()>, movePiece<()> ],
@@ -191,8 +199,7 @@ const calculateAllowedMoves = (roll, player, currentPlayers) => {
   } else {
     for (let j = 0; j < 4; j++) {
       const piece = player.pieces[j];
-      // if piece is in garage, continue
-      // console.log("Checking piece at:", piece);
+      // if piece is in garage && getSquare not greater than driveway.at(-1), continue
       if (piece !== 0) {
         let out = [...roll];
         for (let i = 0; i < roll.length; i++) {
@@ -236,7 +243,6 @@ const calculateAllowedMoves = (roll, player, currentPlayers) => {
       );
     }
   }
-  console.log("blocks", blocks);
 };
 export const makeMove = (move, piece, gs, pturn) => {
   // currentPlayers = Object.assign([], gs);
@@ -347,8 +353,21 @@ export const makeMove = (move, piece, gs, pturn) => {
   return currentPlayers;
 };
 
-const getSquare = (start, amount) => {
-  return (start + amount) % 68;
+const getSquare = (start, amount, color) => {
+  let out = (start + amount) % 68;
+  switch (color) {
+    case "yellow":
+      out = out > 68 ? out + 32 : out;
+      break;
+    case "blue":
+      if (start < 17 || start > 63) {
+        if (out > 17) {
+          out = out + 93;
+        }
+      }
+      break;
+  }
+  return out;
 };
 // parseGameIntoMemory(
 //   `

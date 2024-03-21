@@ -104,18 +104,34 @@ function App() {
   const t = () => {
     socket.emit("hello");
   };
+  /**
+   TODO:
+   - Style game.js - add move ui also - 30 min - DONE
+   - style user page - 30min - DONE
+   - add delete account button - 15min
+   - add w/l to db - 15min
+   - finish game logic to allow for winning properly - 2-3 hours
+   - add rules page - 1hour
+
+   */
 
   return (
     <Router>
-      <div className='bg-gradient-to-br from-slate-600 via-slate-500 to-slate-900 h-[1100px] p-2 '>
+      <div className='bg-gradient-to-br from-neutral-500 via-neutral-400 to-neutral-600 h-screen p-2 '>
         <div className='flex flex-row gap-1'>
           <Link to='/'>
             <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
               Home
             </h1>
           </Link>
+
           {user.id && (
             <>
+              <Link to='/user'>
+                <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
+                  Stats
+                </h1>
+              </Link>
               <LogOutButton className='navLink' />
             </>
           )}

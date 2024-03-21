@@ -14,6 +14,7 @@ import {
   takeTurnRedux,
 } from "../../redux/reducers/game.reducer";
 import Pieces from "../Pieces/Pieces";
+import Move from "./Move";
 export default function Game() {
   const { game, doubles } = useSelector((s) => {
     // doubles {square: 1, colors: ['red', 'blue']}
@@ -84,6 +85,7 @@ export default function Game() {
   }, [game.turn, game.playerNumber]);
 
   useEffect(() => {
+    //for double rolls AFTER initial roll
     if (
       game.gameState[game.playerNumber]?.extraRolls > 0 &&
       game.gameState[game.playerNumber]?.moveBag.length === 0
@@ -96,6 +98,7 @@ export default function Game() {
     game?.playerNumber,
   ]);
   useEffect(() => {
+    // For doubles when all pieces are still at home
     if (
       roll[0] === roll[1] &&
       game.gameState[game.playerNumber]?.pieceOptions.every(
@@ -107,6 +110,10 @@ export default function Game() {
     }
   }, [roll]);
   useEffect(() => {
+    // After a turn hasRolled should be TRUE
+    // extraRolls should be 0
+    // moveBag should be []
+    // canRoll should be false
     if (
       hasRolled &&
       game.gameState[game.playerNumber]?.extraRolls === 0 &&
@@ -181,16 +188,49 @@ export default function Game() {
   const boardRef = useRef();
 
   return (
-    <div>
-      <button onClick={leaveGame}>Leave</button>
-      <button onClick={() => {}}>leaveGame</button>
-      <input type='number'></input>
-      <input type='number' step={0.0001}></input>
-      <p>
-        Game: {JSON.stringify(game.gameState[game.playerNumber]?.pieceOptions)}
-      </p>
+    <div className='flex flex-row  gap-2 mt-3'>
+      <div className='w-64 flex flex-col gap-2'>
+        <div className=' border border-1 border-zinc-400 flex flex-col rounded-md p-2 shadow-sm bg-zinc-500 shadow-zinc-600 gap-2 divide-y divide-zinc-400'>
+          <h1>Controls</h1>
+          <div className='flex gap-2 pt-2'>
+            <button
+              className='rounded-lg bg-slate-50 w-12 h-12 hover:bg-slate-500 hover:text-white hover:border-2 hover:border-white border-2 border-slate-400'
+              onClick={() => rollDice(true)}
+              disabled={!myTurn || !canRoll}
+            >
+              Roll
+            </button>
+            <div className='rounded-lg bg-slate-50 p-4 w-12 h-12 border-4 border-black'></div>
+            <div className='rounded-lg bg-slate-50 p-4 w-12 h-12 border-4 border-black'></div>
+          </div>
+          <div className='flex gap-2 pt-2'>
+            <button
+              className='rounded-md bg-rose-600 p-2 border-2 border-black'
+              onClick={() =>
+                socket.emit("end-game", "player-won", user.username)
+              }
+            >
+              Leave
+            </button>
+          </div>
+        </div>
+        <div>Moves</div>
+        {game.gameState[game.playerNumber]?.pieceOptions.map((po, i) => {
+          if (po.length > 0) {
+            return (
+              <Move
+                pieceAt={game.gameState[game.playerNumber]?.pieces[i]}
+                moves={po}
+                index={i}
+              />
+            );
+          }
+        })}
+      </div>
 
-      <div>
+      {/* <div className='flex flex-col shrink'>
+        <button onClick={leaveGame}>Leave</button>
+        <button onClick={() => {}}>leaveGame</button>
         <p>{JSON.stringify(roll)}</p>
         <button
           onClick={() => rollDice(false)}
@@ -232,9 +272,9 @@ export default function Game() {
             );
           }
         })}
-      </div>
+      </div> */}
       <div style={{ position: "relative" }}>
-        <img src={board} width={800} ref={boardRef} style={{}} />
+        <img src={board} width={615} ref={boardRef} />
 
         {game.gameState &&
           game.gameState?.map((p, i) => (
