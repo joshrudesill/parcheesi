@@ -112,7 +112,7 @@ function App() {
    TODO:
    - Style game.js - add move ui also - 30 min - DONE
    - style user page - 30min - DONE
-   - add delete account button - 15min
+   - add delete account button - 15min - DONE
    - add w/l to db - 15min - DONE
    - finish game logic to allow for winning properly - 2-3 hours
    - add rules page - 1hour

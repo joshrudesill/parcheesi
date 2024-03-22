@@ -94,7 +94,6 @@ export default function Pieces({
   const position = [lb, lbb, rbb, rb, rt, rtt, ltt, lt];
   const p = useMemo(() => {
     let out = [];
-    console.log("memo");
     for (const piece of pieces) {
       const newPos = getPiecePosition(piece, s);
 

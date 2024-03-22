@@ -9,38 +9,29 @@ export const CardStack = ({ items, offset, scaleFactor }) => {
   const SCALE_FACTOR = scaleFactor || 0.06;
   const [cards, setCards] = useState(items);
 
-  const startFlipping = () => {
-    interval = setInterval(() => {
-      setCards((prevCards) => {
-        const newArray = [...prevCards]; // create a copy of the array
-        newArray.unshift(newArray.pop()); // move the last element to the front
-        return newArray;
-      });
-    }, 5000);
-  };
   const next = () => {
     setCards((prevCards) => {
-      const newArray = [...prevCards]; // create a copy of the array
-      newArray.push(newArray.shift()); // move the last element to the front
+      const newArray = [...prevCards];
+      newArray.push(newArray.shift());
       return newArray;
     });
   };
   const prev = () => {
     setCards((prevCards) => {
       const newArray = [...prevCards];
-      const next = newArray[1]; // [1,2,3] - 2
-      newArray.unshift(newArray.pop()); // [2,3,1]
+      const next = newArray[1];
+      newArray.unshift(newArray.pop());
 
       return newArray;
     });
   };
   return (
-    <div className='relative  h-60 w-60 md:h-60 md:w-96'>
+    <div className='relative  h-60 w-60 md:h-60 md:w-[50rem]'>
       {cards.map((card, index) => {
         return (
           <motion.div
             key={card.id}
-            className='absolute dark:bg-black bg-white h-60 w-60 md:h-60 md:w-96 rounded-3xl p-4 shadow-xl border border-neutral-200 dark:border-white/[0.1]  shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col justify-between'
+            className='absolute dark:bg-black bg-white h-60 w-60 md:h-60 md:w-[50rem] rounded-3xl p-4 shadow-xl border border-neutral-200 dark:border-white/[0.1]  shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col justify-between'
             style={{
               transformOrigin: "top center",
             }}
@@ -50,16 +41,11 @@ export const CardStack = ({ items, offset, scaleFactor }) => {
               zIndex: cards.length - index, //  decrease z-index for the cards that are behind
             }}
           >
-            <div className='font-normal text-neutral-700 dark:text-neutral-200'>
+            <div className='font-normal text-neutral-700 dark:text-neutral-200 text-xl'>
               {card.content}
             </div>
             <div>
-              <p className='text-neutral-500 font-medium dark:text-white'>
-                {card.name}
-              </p>
-              <p className='text-neutral-400 font-normal dark:text-neutral-200'>
-                {card.designation}
-              </p>
+              <p className='text-lg font-bold dark:text-white'>{card.name}</p>
             </div>
             <div className='flex flex-row justify-between'>
               <button onClick={prev}>Previous</button>

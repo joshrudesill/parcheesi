@@ -48,7 +48,7 @@ export default function Play() {
               join with code
             </button>
             <input
-              className='bg-transparent border border-slate-500 rounded-md p-0.5'
+              className='bg-transparent border border-slate-500 rounded-md p-0.5 text-gray-200'
               placeholder='code'
               value={gameCode}
               onChange={(e) => setGameCode(e.target.value)}

@@ -18,7 +18,7 @@ function InfoPage() {
 
           <Boxes />
           <h1 className={cn("md:text-4xl text-2xl text-red-600 relative z-20")}>
-            Parcheesi
+            ParchEZ
           </h1>
           <p className='text-center mt-2 text-neutral-300 relative z-20'>
             Simple. Unintrusive. Fun.
