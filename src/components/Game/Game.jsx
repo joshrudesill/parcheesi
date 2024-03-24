@@ -173,7 +173,7 @@ export default function Game() {
       Math.floor(Math.random() * 5) + 1,
     ];
     if (d) {
-      jsRoll = [5, 3];
+      jsRoll = [5, 2];
     }
     setRoll([...jsRoll]);
     dispatch(
@@ -205,14 +205,18 @@ export default function Game() {
             >
               Roll
             </button>
-            <div className='rounded-lg bg-slate-50 p-4 w-12 h-12 border-4 border-black'></div>
-            <div className='rounded-lg bg-slate-50 p-4 w-12 h-12 border-4 border-black'></div>
+            <div className='rounded-lg bg-slate-50 w-12 h-12 border-4 border-black text-center inline-block p-2 text-xl font-bold hover:text-3xl cursor-pointer'>
+              {roll[0]}
+            </div>
+            <div className='rounded-lg bg-slate-50 w-12 h-12 border-4 border-black text-center inline-block p-2 text-xl font-bold hover:text-3xl cursor-pointer'>
+              {roll[1]}
+            </div>
           </div>
           <div className='flex gap-2 pt-2'>
             <button
               className='rounded-md bg-rose-600 p-2 border-2 border-black'
               onClick={() =>
-                socket.emit("end-game", "player-won", user.username)
+                socket.emit("end-game", "player-lost", user.username)
               }
             >
               Leave

@@ -113,15 +113,55 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("end-game", async (reason, player) => {
-    console.log(player);
     if (roomData[socket.gameRoom]) {
-      console.log("2");
       // end game in sql
-      await pool.query(
-        `UPDATE "user" SET current_game = null WHERE current_game = $1;`,
-        [socket.gameRoom]
-      );
-      io.to(socket.gameRoom).emit("gameover", "player-won", player);
+      const connection = await pool.connect();
+      try {
+        await connection.query("BEGIN");
+        await connection.query(
+          `UPDATE "user" SET current_game = null WHERE current_game = $1;`,
+          [socket.gameRoom]
+        );
+        if (reason === "player-lost") {
+          await connection.query(
+            `UPDATE "user" SET wins = wins + 1 WHERE username = $1;`,
+            [roomData[socket.gameRoom].find((p) => p !== player)]
+          );
+          await connection.query(
+            `UPDATE "user" SET loss = loss + 1 WHERE username = $1;`,
+            [player]
+          );
+
+          io.to(socket.gameRoom).emit(
+            "gameover",
+            "player-lost",
+            player,
+            roomData[socket.gameRoom]
+          );
+        } else {
+          await connection.query(
+            `UPDATE "user" SET wins = wins + 1 WHERE username = $1;`,
+            [player]
+          );
+          await connection.query(
+            `UPDATE "user" SET loss = loss + 1 WHERE username = $1;`,
+            [roomData[socket.gameRoom].find((p) => p !== player)]
+          );
+          io.to(socket.gameRoom).emit(
+            "gameover",
+            "player-won",
+            player,
+            roomData[socket.gameRoom]
+          );
+        }
+        await connection.query("COMMIT");
+      } catch (e) {
+        console.error(e);
+        await connection.query("ROLLBACK");
+      } finally {
+        connection.release();
+      }
+
       delete roomData[socket.gameRoom];
       delete socket.gameRoom;
       delete socket.username;

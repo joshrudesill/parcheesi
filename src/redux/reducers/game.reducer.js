@@ -21,7 +21,7 @@ const initialState = {
 //   turns: 1,
 // }
 const gameSlice = createSlice({
-  name: "user",
+  name: "game",
   initialState,
   reducers: {
     setGameCode: (state, action) => {

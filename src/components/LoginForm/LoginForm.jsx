@@ -61,7 +61,7 @@ function LoginForm() {
             password
           </label>
           <input
-            type='text'
+            type='password'
             id='password'
             className='border block w-full p-2.5 bg-gray-800 border-gray-700 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500 rounded-md '
             required

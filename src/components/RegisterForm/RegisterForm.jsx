@@ -30,7 +30,7 @@ function RegisterForm() {
       <div>
         <div className='mb-5'>
           <label
-            for='username'
+            htmlFor='username'
             className='block mb-2 text-md font-medium text-gray-900 dark:text-white'
           >
             username
@@ -49,13 +49,13 @@ function RegisterForm() {
       <div>
         <div className='mb-5'>
           <label
-            for='username'
+            htmlFor='username'
             className='block mb-2 text-md font-medium text-gray-900'
           >
             password
           </label>
           <input
-            type='text'
+            type='password'
             id='password'
             className='border block w-full p-2.5 bg-gray-800 border-gray-700 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500 rounded-md '
             required

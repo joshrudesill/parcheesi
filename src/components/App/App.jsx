@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   HashRouter as Router,
   Redirect,
@@ -49,7 +49,27 @@ function App() {
   useEffect(() => {
     dispatch({ type: "FETCH_USER" });
   }, [dispatch]);
-
+  const determineWinner = useCallback(
+    (reason, player, gameRoom) => {
+      dispatch(gameReset());
+      if (reason === "player-won") {
+        alert(
+          `${gameRoom.find((p) => p === player)} won! ${gameRoom.find(
+            (p) => p !== player
+          )} lost!`
+        );
+      } else if (reason === "player-lost") {
+        alert(
+          `${gameRoom.find((p) => p !== player)} won! ${gameRoom.find(
+            (p) => p === player
+          )} lost!`
+        );
+      }
+      // all users should be updated
+      dispatch({ type: "FETCH_USER" });
+    },
+    [user.username]
+  );
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
@@ -70,16 +90,8 @@ function App() {
     socket.on("leaving-gameroom", (player) => {
       dispatch(addPlayer(player));
     });
-    socket.on("gameover", (reason, player) => {
-      console.log(reason, player);
-      if (reason === "player-won") {
-        dispatch(gameReset());
-        alert(`${player} won`);
-      }
-      // dispatch(gameReset());
-      console.log("gameover");
-      // all users should be updated
-      dispatch({ type: "FETCH_USER" });
+    socket.on("gameover", (reason, player, gameRoom) => {
+      determineWinner(reason, player, gameRoom);
     });
     socket.on("game-start", () => {
       dispatch(setGameStarted(true));
@@ -115,7 +127,7 @@ function App() {
    - add delete account button - 15min - DONE
    - add w/l to db - 15min - DONE
    - finish game logic to allow for winning properly - 2-3 hours
-   - add rules page - 1hour
+   - add rules page - 1hour - DONE
 
    */
 
@@ -123,11 +135,19 @@ function App() {
     <Router>
       <div className='bg-gradient-to-br from-neutral-500 via-neutral-400 to-neutral-600 h-screen p-2 '>
         <div className='flex flex-row gap-1'>
-          <Link to='/'>
-            <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
-              Home
-            </h1>
-          </Link>
+          {user.id ? (
+            <Link to='/'>
+              <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
+                {user.username}
+              </h1>
+            </Link>
+          ) : (
+            <Link to='/'>
+              <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
+                Home
+              </h1>
+            </Link>
+          )}
           <Link to='/rules'>
             <h1 className='px-4 py-2 rounded-md border border-black  text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 '>
               Rules

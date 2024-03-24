@@ -11,6 +11,14 @@ export default function Pieces({
 }) {
   const gameState = useSelector((s) => s.game.gameState);
   const [s, sets] = useState(0.047);
+  const colorSource = useMemo(() => {
+    if (color === "yellow") {
+      return blue;
+    }
+    if (color === "red") {
+      return red;
+    }
+  }, [color]);
   const getPiecePosition = (square, step) => {
     if (square === 0) {
       return { x: 0, y: 0 };
@@ -127,65 +135,63 @@ export default function Pieces({
             .map((e) => e.at)
             .includes(p.at)
         ) {
-          if (iteration === 0) {
-            if (horizontals.includes(p.at)) {
-              const colors = Object.values(doubles).map((c) => c.color);
-              return (
-                <>
-                  <img
-                    src={blue}
-                    width={30}
-                    style={{
-                      position: "absolute",
-                      left: p.x,
-                      top: p.y + 20,
-                    }}
-                  />
-                  <img
-                    src={blue}
-                    width={30}
-                    style={{
-                      position: "absolute",
-                      left: p.x,
-                      top: p.y - 20,
-                    }}
-                  />
-                </>
-              );
-            } else {
-              return (
-                <>
-                  <img
-                    src={blue}
-                    width={30}
-                    style={{
-                      position: "absolute",
-                      left: p.x + 20,
-                      top: p.y,
-                    }}
-                  />
-                  <img
-                    src={blue}
-                    width={30}
-                    style={{
-                      position: "absolute",
-                      left: p.x - 20,
-                      top: p.y,
-                    }}
-                  />
-                </>
-              );
-            }
+          if (horizontals.includes(p.at)) {
+            return (
+              <>
+                <img
+                  src={colorSource}
+                  width={25}
+                  style={{
+                    position: "absolute",
+                    left: p.x,
+                    top: p.y + 15,
+                  }}
+                />
+                <img
+                  src={colorSource}
+                  width={25}
+                  style={{
+                    position: "absolute",
+                    left: p.x,
+                    top: p.y - 15,
+                  }}
+                />
+              </>
+            );
+          } else {
+            return (
+              <>
+                <img
+                  src={colorSource}
+                  width={25}
+                  style={{
+                    position: "absolute",
+                    left: p.x + 15,
+                    top: p.y,
+                  }}
+                />
+                <img
+                  src={colorSource}
+                  width={25}
+                  style={{
+                    position: "absolute",
+                    left: p.x - 15,
+                    top: p.y,
+                  }}
+                />
+              </>
+            );
           }
         } else {
           return (
             <img
-              src={color === "yellow" ? red : blue}
+              src={colorSource}
               width={25}
               style={{
                 position: "absolute",
                 left: p.x,
                 top: p.y,
+                opacity: p.x === 0 && p.y === 0 ? "0" : "1",
               }}
             />
           );
@@ -212,7 +218,7 @@ export default function Pieces({
           return (
             <>
               <img
-                src={color === "yellow" ? red : blue}
+                src={colorSource}
                 style={{
                   position: "relative",
                   ...homePieceCoords[i],
