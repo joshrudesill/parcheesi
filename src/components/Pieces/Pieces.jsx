@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import red from "/src/assets/red.svg";
 import blue from "/src/assets/blue.svg";
+import yellow from "/src/assets/yellow.svg";
 import { useEffect, useMemo, useState } from "react";
 export default function Pieces({
   color,
@@ -13,7 +14,7 @@ export default function Pieces({
   const [s, sets] = useState(0.047);
   const colorSource = useMemo(() => {
     if (color === "yellow") {
-      return blue;
+      return yellow;
     }
     if (color === "red") {
       return red;
