@@ -113,7 +113,7 @@ export default function Lobby() {
                   .map((p, i) => {
                     if (game.players[i]) {
                       return (
-                        <div className='border border-neutral-400 rounded-md p-2 text-neutral-400'>
+                        <div className='border border-neutral-400 rounded-md p-2 text-neutral-400 hover:bg-neutral-300 hover:text-black'>
                           {game.players[i]}
                         </div>
                       );
