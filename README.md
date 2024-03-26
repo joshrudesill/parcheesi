@@ -8,13 +8,20 @@ Clone this repository and ```npm install```
 
 After all the dependencies are installed you will need an instance of PostgreSQL running and you will need to connect to it in ```server/server.js```
 
-Then ```npm run server```and ```npm run client```
+1. Create a database named `parcheesi`,
+2. The queries in the `tables.sql` file are set up to create all the necessary tables and populate the needed data to allow the application to run correctly. The project is built on [Postgres](https://www.postgresql.org/download/), so you will need to make sure to have that installed. We recommend using Postico to run those queries as that was used to create the queries, 
+3. Open up your editor of choice and run an `npm install`
+4. Run `npm run server` in your terminal
+5. Run `npm run client` in your terminal
+6. The `npm run client` command will open up a new browser tab for you!
+
+
 
 
 
 ## Built With
 
-* [React]https://react.dev/) - The front end framework used
+* [React](https://react.dev/) - The front end framework used
 * [Express](https://expressjs.com/) - For the server
 * [Socket.io](https://socket.io/) - For socket management
 * [Tailwind](https://tailwindcss.com/) - For general styling
@@ -25,3 +32,14 @@ Then ```npm run server```and ```npm run client```
 ## Acknowledgments
 
 * Thank you to everyone at Prime for supporting me through this project
+
+
+![MIT LICENSE](https://img.shields.io/github/license/scottbromander/the_marketplace.svg?style=flat-square)
+![REPO SIZE](https://img.shields.io/github/repo-size/scottbromander/the_marketplace.svg?style=flat-square)
+![TOP_LANGUAGE](https://img.shields.io/github/languages/top/scottbromander/the_marketplace.svg?style=flat-square)
+![FORKS](https://img.shields.io/github/forks/scottbromander/the_marketplace.svg?style=social)
+
+
+
+## Support
+If you have suggestions or issues, please email me at [youremail@whatever.com](www.google.com)
